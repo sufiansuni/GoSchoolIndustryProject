@@ -1,5 +1,9 @@
 package main
 
+// Basic HTTP Server Framework with the following functionality:
+// Login/Logout
+// Signup
+
 import (
 	"html/template"
 	"net/http"
