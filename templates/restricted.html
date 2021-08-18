@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Detailed Information</title>
+</head>
+<body>
+
+<h1>User Detailed Information</h1>
+{{if .First}}
+Your username is {{.Username}}<br>
+Your password is {{.Password}}<br>
+Your first name is {{.First}}<br>
+Your last name is {{.Last}}<br>
+<h2><a href="/logout">Log Out</a></h2>
+{{end}}
+
+</body>
+</html>
