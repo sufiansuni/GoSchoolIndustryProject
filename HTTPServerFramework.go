@@ -3,11 +3,16 @@ package main
 // Basic HTTP Server Framework with the following functionality:
 // Login/Logout
 // Signup
+// "Restricted Page" is a test page, to be removed
 
 import (
+	"database/sql"
+	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,35 +24,55 @@ type user struct {
 	Last     string
 }
 
+type session struct {
+	UUID     string //primary key
+	Username string //foreign key
+}
+
 var tpl *template.Template
-var mapUsers = map[string]user{}
-var mapSessions = map[string]string{}
+//var mapUsers = map[string]user{}
+//var mapSessions = map[string]string{}
+
+func createAdminAccount() {
+	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
+	myUser := user{
+		Username: "admin",
+		Password: bPassword,
+		First:    "first",
+		Last:     "last",
+	}
+	err := insertUser(myUser) //previously mapUsers["admin"] = myUser
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Admin Account Created")
+	}
+}
 
 func HTTPServerInit() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
-	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
-	mapUsers["admin"] = user{"admin", bPassword, "admin", "admin"}
-
+	createAdminAccount() // Create Admin Account, Previously: mapUsers["admin"] = user{"admin", bPassword, "admin", "admin"}
 }
 
 func StartHTTPServer() {
 	HTTPServerInit()
-	http.HandleFunc("/", index)
-	http.HandleFunc("/restricted", restricted)
-	http.HandleFunc("/signup", signup)
-	http.HandleFunc("/login", login)
-	http.HandleFunc("/logout", logout)
-	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.ListenAndServe(":8080", nil)
+	r := mux.NewRouter() //New Router Instance
+	r.HandleFunc("/", index)
+	r.HandleFunc("/restricted", restricted)
+	r.HandleFunc("/signup", signup)
+	r.HandleFunc("/login", login)
+	r.HandleFunc("/logout", logout)
+	r.Handle("/favicon.ico", http.NotFoundHandler())
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func index(res http.ResponseWriter, req *http.Request) {
-	myUser := getUser(res, req)
+	myUser := checkUser(res, req)
 	tpl.ExecuteTemplate(res, "index.html", myUser)
 }
 
 func restricted(res http.ResponseWriter, req *http.Request) {
-	myUser := getUser(res, req)
+	myUser := checkUser(res, req)
 	if !alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
@@ -70,10 +95,21 @@ func signup(res http.ResponseWriter, req *http.Request) {
 		lastname := req.FormValue("lastname")
 		if username != "" {
 			// check if username exist/ taken
-			if _, ok := mapUsers[username]; ok {
+			var checker string
+
+			query := "SELECT Username FROM users WHERE Username=?"
+
+			err := db.QueryRow(query, username).Scan(&checker)
+			if err != nil {
+				if err != sql.ErrNoRows {
+					http.Error(res, "Internal server error", http.StatusInternalServerError)
+					return
+				}
+			} else {
 				http.Error(res, "Username already taken", http.StatusForbidden)
 				return
 			}
+			
 			// create session
 			id := uuid.NewV4()
 			myCookie := &http.Cookie{
@@ -81,7 +117,15 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				Value: id.String(),
 			}
 			http.SetCookie(res, myCookie)
-			mapSessions[myCookie.Value] = username
+
+			mySession := session{myCookie.Value, username}
+
+			err = insertSession(mySession) // previously: mapSessions[myCookie.Value] = username
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("Session Created")
+			}
 
 			bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 			if err != nil {
@@ -89,9 +133,21 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			myUser = user{username, bPassword, firstname, lastname}
-			mapUsers[username] = myUser
+			myUser = user{
+				Username: username,
+				Password: bPassword,
+				First:	firstname,
+				Last:	lastname,
+			}
+
+			err = insertUser(myUser) // previouslymapUsers[username] = myUser
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Println("User Created:", username)
+			}
 		}
+
 		// redirect to main index
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
@@ -111,17 +167,26 @@ func login(res http.ResponseWriter, req *http.Request) {
 		username := req.FormValue("username")
 		password := req.FormValue("password")
 		// check if user exist with username
-		myUser, ok := mapUsers[username]
-		if !ok {
+		var checker user
+
+		query := "SELECT Username, Password FROM users WHERE Username=?"
+		err := db.QueryRow(query, username).Scan(
+			&checker.Username,
+			&checker.Password,
+		)
+		if err != nil {
+			fmt.Println(err)
 			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 			return
 		}
+
 		// Matching of password entered
-		err := bcrypt.CompareHashAndPassword(myUser.Password, []byte(password))
+		err = bcrypt.CompareHashAndPassword(checker.Password, []byte(password))
 		if err != nil {
-			http.Error(res, "Username and/or password do not match", http.StatusForbidden)
+			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 			return
 		}
+
 		// create session
 		id := uuid.NewV4()
 		myCookie := &http.Cookie{
@@ -129,11 +194,18 @@ func login(res http.ResponseWriter, req *http.Request) {
 			Value: id.String(),
 		}
 		http.SetCookie(res, myCookie)
-		mapSessions[myCookie.Value] = username
+
+		mySession := session{myCookie.Value, username}
+		err = insertSession(mySession) // previously: mapSessions[myCookie.Value] = username
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println("Session Created")
+		}
+
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-
 	tpl.ExecuteTemplate(res, "login.html", nil)
 }
 
@@ -144,7 +216,9 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	}
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
-	delete(mapSessions, myCookie.Value)
+
+	deleteSession(myCookie.Value)
+	
 	// remove the cookie
 	myCookie = &http.Cookie{
 		Name:   "myCookie",
@@ -156,7 +230,7 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
-func getUser(res http.ResponseWriter, req *http.Request) user {
+func checkUser(res http.ResponseWriter, req *http.Request) user {
 	// get current session cookie
 	myCookie, err := req.Cookie("myCookie")
 	if err != nil {
@@ -165,16 +239,38 @@ func getUser(res http.ResponseWriter, req *http.Request) user {
 			Name:  "myCookie",
 			Value: id.String(),
 		}
-
 	}
 	http.SetCookie(res, myCookie)
 
 	// if the user exists already, get user
+	var checker string
 	var myUser user
-	if username, ok := mapSessions[myCookie.Value]; ok {
-		myUser = mapUsers[username]
-	}
 
+	query := "SELECT Username FROM sessions WHERE UUID=?"
+	err = db.QueryRow(query, myCookie.Value).Scan(&checker)
+
+	if err != nil {
+		if err != sql.ErrNoRows {
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+		} else {
+			fmt.Println("No Entry Found in Database for UUID:" + myCookie.Value)
+		}
+	} else {
+		query = "SELECT * FROM users WHERE Username=?"
+		err = db.QueryRow(query, checker).Scan(
+			&myUser.Username,
+			&myUser.Password,
+			&myUser.First,
+			&myUser.Last,
+		)
+		if err != nil {
+			if err != sql.ErrNoRows {
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+			} else {
+				fmt.Println("No Entry Found in Database for User:" + checker)
+			}
+		}
+	}
 	return myUser
 }
 
@@ -183,7 +279,26 @@ func alreadyLoggedIn(req *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	username := mapSessions[myCookie.Value]
-	_, ok := mapUsers[username]
-	return ok
+	var checker string
+
+	query := "SELECT Username FROM sessions WHERE UUID=?"
+
+	err = db.QueryRow(query, myCookie.Value).Scan(&checker)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			fmt.Print(err)
+		} else {
+			fmt.Println("No Entry Found in Database for UUID:" + myCookie.Value)
+		}
+	} else {
+		query = "SELECT Username FROM users WHERE Username=?"
+
+		err = db.QueryRow(query, checker).Scan(&checker)
+		if err != nil {
+			fmt.Print(err)
+		} else {
+			return true
+		}
+	}
+	return false
 }
