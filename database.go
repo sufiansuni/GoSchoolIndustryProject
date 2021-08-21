@@ -24,7 +24,7 @@ func connectDatabase() {
 
 	// if there is an error opening the connection, handle it
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	} else {
 		fmt.Println("Database Opened")
 	}
@@ -33,7 +33,7 @@ func connectDatabase() {
 func pingDatabase() {
 	err := db.Ping()
 	if err != nil {
-		panic(err.Error())
+		panic(err)
 	} else {
 		fmt.Println("Database Ping Successful")
 	}

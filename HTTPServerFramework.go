@@ -30,8 +30,8 @@ type session struct {
 }
 
 var tpl *template.Template
-//var mapUsers = map[string]user{}
-//var mapSessions = map[string]string{}
+//Pre-Database: var mapUsers = map[string]user{}
+//Pre-Database: var mapSessions = map[string]string{}
 
 func createAdminAccount() {
 	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
@@ -43,7 +43,7 @@ func createAdminAccount() {
 	}
 	err := insertUser(myUser) //previously mapUsers["admin"] = myUser
 	if err != nil {
-		fmt.Println(err)
+		panic(err)
 	} else {
 		fmt.Println("Admin Account Created")
 	}
@@ -102,10 +102,14 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			err := db.QueryRow(query, username).Scan(&checker)
 			if err != nil {
 				if err != sql.ErrNoRows {
+					fmt.Println(err)
 					http.Error(res, "Internal server error", http.StatusInternalServerError)
 					return
+				} else {
+					fmt.Println("User '", username, "' not found. ", err.Error())
 				}
 			} else {
+				fmt.Println(err)
 				http.Error(res, "Username already taken", http.StatusForbidden)
 				return
 			}
@@ -123,12 +127,15 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			err = insertSession(mySession) // previously: mapSessions[myCookie.Value] = username
 			if err != nil {
 				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
 			} else {
 				fmt.Println("Session Created")
 			}
 
 			bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 			if err != nil {
+				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
 				return
 			}
@@ -143,6 +150,8 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			err = insertUser(myUser) // previouslymapUsers[username] = myUser
 			if err != nil {
 				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
 			} else {
 				fmt.Println("User Created:", username)
 			}
@@ -183,6 +192,7 @@ func login(res http.ResponseWriter, req *http.Request) {
 		// Matching of password entered
 		err = bcrypt.CompareHashAndPassword(checker.Password, []byte(password))
 		if err != nil {
+			fmt.Println(err)
 			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
 			return
 		}
@@ -199,6 +209,8 @@ func login(res http.ResponseWriter, req *http.Request) {
 		err = insertSession(mySession) // previously: mapSessions[myCookie.Value] = username
 		if err != nil {
 			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
 		} else {
 			fmt.Println("Session Created")
 		}
@@ -217,7 +229,12 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 
-	deleteSession(myCookie.Value)
+	err := deleteSession(myCookie.Value)
+	if err != nil {		
+		fmt.Println(err)		
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 	
 	// remove the cookie
 	myCookie = &http.Cookie{
@@ -251,6 +268,7 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 
 	if err != nil {
 		if err != sql.ErrNoRows {
+			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
 		} else {
 			fmt.Println("No Entry Found in Database for UUID:" + myCookie.Value)
@@ -265,6 +283,7 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 		)
 		if err != nil {
 			if err != sql.ErrNoRows {
+				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
 			} else {
 				fmt.Println("No Entry Found in Database for User:" + checker)
