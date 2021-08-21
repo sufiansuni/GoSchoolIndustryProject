@@ -13,10 +13,10 @@ var db *sql.DB
 func connectDatabase() {
 	user := goDotEnvVariable("DATABASE_USER")
 	password := goDotEnvVariable("DATABASE_PASSWORD")
-	hostname := goDotEnvVariable("DATABASE_HOST")
+	host := goDotEnvVariable("DATABASE_HOST")
 	port:= goDotEnvVariable("DATABASE_PORT")
 	dbname := goDotEnvVariable("DATABASE_NAME")
-	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, hostname, port, dbname)
+	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
 
 	connectionstring += "?parseTime=True&loc=Local" //additional parameters
 	var err error
