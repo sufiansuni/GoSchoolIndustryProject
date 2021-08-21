@@ -11,11 +11,12 @@ var db *sql.DB
 
 //connects to the database according to set values
 func connectDatabase() {
-	user := "root"
-	password := "password"
-	hostname := "127.0.0.1:3306"
-	dbname := "my_db"
-	connectionstring := fmt.Sprintf("%s:%s@tcp(%s)/%s", user, password, hostname, dbname)
+	user := goDotEnvVariable("DATABASE_USER")
+	password := goDotEnvVariable("DATABASE_PASSWORD")
+	hostname := goDotEnvVariable("DATABASE_HOST")
+	port:= goDotEnvVariable("DATABASE_PORT")
+	dbname := goDotEnvVariable("DATABASE_NAME")
+	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, hostname, port, dbname)
 
 	connectionstring += "?parseTime=True&loc=Local" //additional parameters
 	var err error
