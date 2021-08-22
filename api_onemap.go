@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"net/http"
 )
@@ -39,9 +40,9 @@ type API_OneMap_Error_Result struct {
 	Error string `json:"error"`
 }
 
-func API_OneMap_Search(search_val string) (interface{}, error) {
+func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
 	var result API_OneMap_Search_Result
-	var error_result API_OneMap_Error_Result
+
 	url := "https://developers.onemap.sg/commonapi/search?searchVal=" + search_val + "&returnGeom=Y&getAddrDetails=Y"
 	if resp, err := http.Get(url); err == nil {
 		defer resp.Body.Close()
@@ -50,21 +51,22 @@ func API_OneMap_Search(search_val string) (interface{}, error) {
 				json.Unmarshal(body, &result)
 				return result, err
 			} else {
+				var error_result API_OneMap_Error_Result
 				json.Unmarshal(body, &error_result)
-				error_result.Error += " Status Code: " + string(rune(resp.StatusCode))
-				return error_result, err
+				err_msg := error_result.Error + " Status Code: " + string(rune(resp.StatusCode))
+				return result, errors.New(err_msg)
 			}
 		} else {
-			return error_result, err
+			return result, err
 		}
 	} else {
-		return error_result, err
+		return result, err
 	}
 }
 
-func API_OneMap_GetToken() (interface{}, error) {
+func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 	var result API_OneMap_GetToken_Result
-	var error_result API_OneMap_Error_Result
+
 	url := "https://developers.onemap.sg/privateapi/auth/post/getToken"
 	values := map[string]string{
 		"email":    goDotEnvVariable("API_ONEMAP_EMAIL"),
@@ -78,14 +80,15 @@ func API_OneMap_GetToken() (interface{}, error) {
 				json.Unmarshal(body, &result)
 				return result, err
 			} else {
+				var error_result API_OneMap_Error_Result
 				json.Unmarshal(body, &error_result)
-				error_result.Error += " Status Code: " + string(rune(resp.StatusCode))
-				return error_result, err
+				err_msg := error_result.Error + " Status Code: " + string(rune(resp.StatusCode))
+				return result, errors.New(err_msg)
 			}
 		} else {
-			return error_result, err
+			return result, err
 		}
 	} else {
-		return error_result, err
+		return result, err
 	}
 }
