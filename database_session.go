@@ -2,6 +2,7 @@ package main
 
 // Operations for Session database: Insert, Delete, Update
 
+//insert a new session entry
 func insertSession(mySession session) error {
 	_, err := db.Exec("INSERT INTO sessions(UUID, Username) VALUES(?, ?)",
 		mySession.UUID, mySession.Username)
@@ -11,6 +12,7 @@ func insertSession(mySession session) error {
 	return nil
 }
 
+//delete a session entry
 func deleteSession(UUID string) error {
 	_, err := db.Exec("DELETE FROM sessions where UUID=?",
 		UUID)

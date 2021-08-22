@@ -1,6 +1,6 @@
 package main
 
-func main(){
+func main() {
 	//Begin connection to database, then ping to test
 	connectDatabase()
 	defer db.Close()

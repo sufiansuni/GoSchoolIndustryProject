@@ -30,6 +30,7 @@ func connectDatabase() {
 	}
 }
 
+//ping the database to test connection
 func pingDatabase() {
 	err := db.Ping()
 	if err != nil {
@@ -39,6 +40,7 @@ func pingDatabase() {
 	}
 }
 
+//creates "users" table
 func createUserTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"users" +
@@ -56,6 +58,7 @@ func createUserTable() {
 	}
 }
 
+//creates "sessions" table
 func createSessionTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"sessions" +
