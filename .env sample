@@ -1,6 +1,8 @@
 API_ONEMAP_EMAIL = "email@email.com"
 API_ONEMAP_PASSWORD = "Password1234"
 
+API_TOMTOM_TOKEN = "TomTom API Token Here"
+
 DATABASE_USER = "root"
 DATABASE_PASSWORD = "password"
 DATABASE_HOST = "localhost"

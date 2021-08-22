@@ -30,6 +30,7 @@ type session struct {
 }
 
 var tpl *template.Template
+
 //Pre-Database: var mapUsers = map[string]user{}
 //Pre-Database: var mapSessions = map[string]string{}
 
@@ -43,7 +44,7 @@ func createAdminAccount() {
 	}
 	err := insertUser(myUser) //previously mapUsers["admin"] = myUser
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	} else {
 		fmt.Println("Admin Account Created")
 	}
@@ -63,6 +64,7 @@ func StartHTTPServer() {
 	r.HandleFunc("/login", login)
 	r.HandleFunc("/logout", logout)
 	r.Handle("/favicon.ico", http.NotFoundHandler())
+	r.HandleFunc("/testmap", testmap)
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
@@ -113,7 +115,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				http.Error(res, "Username already taken", http.StatusForbidden)
 				return
 			}
-			
+
 			// create session
 			id := uuid.NewV4()
 			myCookie := &http.Cookie{
@@ -143,8 +145,8 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			myUser = user{
 				Username: username,
 				Password: bPassword,
-				First:	firstname,
-				Last:	lastname,
+				First:    firstname,
+				Last:     lastname,
 			}
 
 			err = insertUser(myUser) // previouslymapUsers[username] = myUser
@@ -230,12 +232,12 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	// delete the session
 
 	err := deleteSession(myCookie.Value)
-	if err != nil {		
-		fmt.Println(err)		
+	if err != nil {
+		fmt.Println(err)
 		http.Error(res, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	
+
 	// remove the cookie
 	myCookie = &http.Cookie{
 		Name:   "myCookie",
