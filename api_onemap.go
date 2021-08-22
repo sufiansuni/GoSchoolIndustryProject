@@ -45,10 +45,14 @@ type API_OneMap_Error_Result struct {
 	Error string `json:"error"`
 }
 
+//Function sends GET request to OneMap Search API and returns the unmarshaled json response
 func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
+	
 	var result API_OneMap_Search_Result
 
+	//make string safe for http query
 	search_val = url.QueryEscape(search_val)
+
 	my_url := "https://developers.onemap.sg/commonapi/search?searchVal=" + search_val + "&returnGeom=Y&getAddrDetails=Y"
 	if resp, err := http.Get(my_url); err == nil {
 		defer resp.Body.Close()
@@ -70,7 +74,10 @@ func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
 	}
 }
 
+//Function sends POST request to OneMap GetToken API and returns the unmarshaled json response
+//requires email and password in .env file
 func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
+
 	var result API_OneMap_GetToken_Result
 
 	url := "https://developers.onemap.sg/privateapi/auth/post/getToken"
@@ -99,6 +106,10 @@ func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 	}
 }
 
+//Function makes use of API_TomTom_Routing and processes function inputs.
+//Returns a suitable request string to OneMAP Static Map API
+//Note that the result the above request is of PNG format.
+//Pass it to a html template. Eg: <img src = {{.}} alt="Map">
 func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat string, end_lng string) string {
 
 	route, err := API_TomTom_Routing(start_lat, start_lng, end_lat, end_lng)
@@ -121,9 +132,9 @@ func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat strin
 	lines += "]:177,0,0:3" //Line R,G,B,Thickness
 
 	var points string
-	points += "[" + start_lat + "," + start_lng + ",%22175,50,0%22,%22A%22]"
+	points += "[" + start_lat + "," + start_lng + ",%22"+ "175,50,0"+ "%22,%22" + "A"+ "%22]" //R,G,B,Label
 	points += "|"
-	points += "[" + end_lat + "," + end_lng + ",%22255,255,178%22,%22B%22]"
+	points += "[" + end_lat + "," + end_lng + ",%22"+ "255,255,178" + "%22,%22" + "B" + "%22]" //R,G,B,Label
 
 	MapPNG := "https://developers.onemap.sg/commonapi/staticmap/getStaticImage?layerchosen=default&" +
 		"&lat=" + mid_lat +
@@ -139,6 +150,7 @@ func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat strin
 	return MapPNG
 }
 
+//Function will convert string inputs into Point type and return a mid-point
 func find_mid(start_lat string, start_lng string, end_lat string, end_lng string) (string, string, error) {
 
 	start_lat_conv, err := strconv.ParseFloat(start_lat, 64)

@@ -34,6 +34,7 @@ var tpl *template.Template
 //Pre-Database: var mapUsers = map[string]user{}
 //Pre-Database: var mapSessions = map[string]string{}
 
+//Function creates initial admin account. If account already exist, error will be printed.
 func createAdminAccount() {
 	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
 	myUser := user{
@@ -50,11 +51,13 @@ func createAdminAccount() {
 	}
 }
 
+//Init Function for HTTP Server Functionality. Init templates and admin account.
 func HTTPServerInit() {
 	tpl = template.Must(template.ParseGlob("templates/*"))
 	createAdminAccount() // Create Admin Account, Previously: mapUsers["admin"] = user{"admin", bPassword, "admin", "admin"}
 }
 
+//Function will map handlers and start the http server
 func StartHTTPServer() {
 	HTTPServerInit()
 	r := mux.NewRouter() //New Router Instance
@@ -65,28 +68,34 @@ func StartHTTPServer() {
 	r.HandleFunc("/logout", logout)
 	r.Handle("/favicon.ico", http.NotFoundHandler())
 	r.HandleFunc("/testmap", testmap)
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
+//Function handles request of index/homepage
 func index(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
 	tpl.ExecuteTemplate(res, "index.html", myUser)
 }
 
+//Function handles request of restricted page
 func restricted(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
 	if !alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
+	
 	tpl.ExecuteTemplate(res, "restricted.html", myUser)
 }
 
+//Function handles request of sign-up page. Also login the user on success.
 func signup(res http.ResponseWriter, req *http.Request) {
 	if alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
+
 	var myUser user
 	// process form submission
 	if req.Method == http.MethodPost {
@@ -135,6 +144,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				fmt.Println("Session Created")
 			}
 
+			//check password
 			bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 			if err != nil {
 				fmt.Println(err)
@@ -167,6 +177,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "signup.html", myUser)
 }
 
+//Function handles request of login page. Login user on successful POST
 func login(res http.ResponseWriter, req *http.Request) {
 	if alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
@@ -220,9 +231,12 @@ func login(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
+
+	//Execute Template when Method not POST. 
 	tpl.ExecuteTemplate(res, "login.html", nil)
 }
 
+//Function handles request of logout page
 func logout(res http.ResponseWriter, req *http.Request) {
 	if !alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
@@ -249,6 +263,8 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
 
+//function locates user's cookie and check against session data. Creates cookie if not present.
+//if user is found, returns the user data
 func checkUser(res http.ResponseWriter, req *http.Request) user {
 	// get current session cookie
 	myCookie, err := req.Cookie("myCookie")
@@ -295,6 +311,9 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 	return myUser
 }
 
+//function locates user's cookie and check against session data.
+//returns true if user found(logged in), else return false
+//function DOES NOT issue cookie if not found
 func alreadyLoggedIn(req *http.Request) bool {
 	myCookie, err := req.Cookie("myCookie")
 	if err != nil {
