@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+var API_TOMTOM_TOKEN string = "CLk06Ah1CEtwbreYgedJ4VHY2ypDvaZ5"
+
 type API_TomTom_Routing_Result struct {
 	Formatversion string `json:"formatVersion"`
 	Routes        []struct {
@@ -59,7 +61,7 @@ func API_TomTom_Routing(start_lat string, start_lng string, end_lat string, end_
 		end_lat + url.QueryEscape(",") +
 		end_lng +
 		"/json?routeType=fastest&traffic=true&avoid=unpavedRoads&travelMode=pedestrian&key=" +
-		goDotEnvVariable("API_TOMTOM_TOKEN")
+		API_TOMTOM_TOKEN
 
 	if resp, err := http.Get(my_url); err == nil {
 		defer resp.Body.Close()
