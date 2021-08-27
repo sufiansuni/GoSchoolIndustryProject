@@ -8,14 +8,19 @@ import (
 )
 
 var db *sql.DB
+var DATABASE_USER string = "root"
+var DATABASE_PASSWORD string = "password"
+var DATABASE_HOST string = "localhost"
+var DATABASE_PORT string = "3306"
+var DATABASE_NAME string = "my_db"
 
 //connects to the database according to set values
 func connectDatabase() {
-	user := goDotEnvVariable("DATABASE_USER")
-	password := goDotEnvVariable("DATABASE_PASSWORD")
-	host := goDotEnvVariable("DATABASE_HOST")
-	port:= goDotEnvVariable("DATABASE_PORT")
-	dbname := goDotEnvVariable("DATABASE_NAME")
+	user := DATABASE_USER
+	password := DATABASE_PASSWORD
+	host := DATABASE_HOST
+	port:= DATABASE_PORT
+	dbname := DATABASE_NAME
 	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
 
 	connectionstring += "?parseTime=True&loc=Local" //additional parameters
