@@ -9,6 +9,7 @@ func main() {
 	//create tables in database
 	createUserTable()
 	createSessionTable()
+	createRestaurantTable()
 
 	//Start HTTP Server
 	StartHTTPServer()

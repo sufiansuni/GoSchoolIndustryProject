@@ -310,6 +310,7 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 			&myUser.Password,
 			&myUser.First,
 			&myUser.Last,
+			&myUser.Gender,
 			&myUser.Birthday,
 			&myUser.Height,
 			&myUser.Weight,

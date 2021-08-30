@@ -19,7 +19,7 @@ func connectDatabase() {
 	user := DATABASE_USER
 	password := DATABASE_PASSWORD
 	host := DATABASE_HOST
-	port:= DATABASE_PORT
+	port := DATABASE_PORT
 	dbname := DATABASE_NAME
 	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
 
@@ -89,5 +89,27 @@ func createSessionTable() {
 		panic(err)
 	} else {
 		fmt.Println("Table Checked/Created: sessions")
+	}
+}
+
+func createRestaurantTable() {
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+		"restaurants" +
+		" (" +
+		"ID VARCHAR(255) PRIMARY KEY, " +
+		"Name VARCHAR(255), " +
+		"Description VARCHAR(255), " +
+		"Halal BOOL, " +
+		"Vegan BOOL, " +
+		"Address VARCHAR(255), " +
+		"PostalCode MEDIUMINT, " +
+		"Lat FLOAT, " +
+		"Lng FLOAT" +
+		")")
+
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Table Checked/Created: restaurants")
 	}
 }
