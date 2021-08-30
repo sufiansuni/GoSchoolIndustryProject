@@ -18,10 +18,21 @@ import (
 )
 
 type user struct {
-	Username string
-	Password []byte
-	First    string
-	Last     string
+	Username       string
+	Password       []byte
+	First          string
+	Last           string
+	Gender         string
+	Birthday       string
+	Height         int
+	Weight         float64
+	CaloriesPerDay int
+	Halal          bool
+	Vegan          bool
+	Address        string
+	PostalCode     int
+	Lat            float64
+	Lng            float64
 }
 
 type session struct {
@@ -85,7 +96,7 @@ func restricted(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-	
+
 	tpl.ExecuteTemplate(res, "restricted.html", myUser)
 }
 
@@ -232,7 +243,7 @@ func login(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//Execute Template when Method not POST. 
+	//Execute Template when Method not POST.
 	tpl.ExecuteTemplate(res, "login.html", nil)
 }
 
@@ -293,11 +304,22 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 		}
 	} else {
 		query = "SELECT * FROM users WHERE Username=?"
+
 		err = db.QueryRow(query, checker).Scan(
 			&myUser.Username,
 			&myUser.Password,
 			&myUser.First,
 			&myUser.Last,
+			&myUser.Birthday,
+			&myUser.Height,
+			&myUser.Weight,
+			&myUser.CaloriesPerDay,
+			&myUser.Halal,
+			&myUser.Vegan,
+			&myUser.Address,
+			&myUser.PostalCode,
+			&myUser.Lat,
+			&myUser.Lng,
 		)
 		if err != nil {
 			if err != sql.ErrNoRows {

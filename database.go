@@ -23,11 +23,12 @@ func connectDatabase() {
 	dbname := DATABASE_NAME
 	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
 
-	connectionstring += "?parseTime=True&loc=Local" //additional parameters
+	//additional parameters
+	connectionstring += "?parseTime=True&loc=Local"
 	var err error
 	db, err = sql.Open("mysql", connectionstring)
 
-	// if there is an error opening the connection, handle it
+	//if there is an error opening the connection, handle it
 	if err != nil {
 		panic(err)
 	} else {
@@ -46,6 +47,7 @@ func pingDatabase() {
 }
 
 //creates "users" table
+
 func createUserTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"users" +
@@ -53,7 +55,18 @@ func createUserTable() {
 		"Username VARCHAR(255) PRIMARY KEY, " +
 		"Password BLOB, " +
 		"First VARCHAR(255), " +
-		"Last VARCHAR(255)" +
+		"Last VARCHAR(255), " +
+		"Gender VARCHAR(6), " +
+		"Birthday DATE, " +
+		"Height SMALLINT, " +
+		"Weight SMALLINT, " +
+		"CaloriesPerDay FLOAT, " +
+		"Halal BOOL, " +
+		"Vegan BOOL, " +
+		"Address VARCHAR(255), " +
+		"PostalCode MEDIUMINT, " +
+		"Lat FLOAT, " +
+		"Lng FLOAT" +
 		")")
 
 	if err != nil {
