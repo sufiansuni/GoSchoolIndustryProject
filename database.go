@@ -118,6 +118,7 @@ func createFoodTable() {
 		"Food" +
 		" (" +
 		"ID VARCHAR(255) PRIMARY KEY, " +
+		"RestaurantID VARCHAR(255), " +
 		"Name VARCHAR(255), " +
 		"Price FLOAT, " +
 		"Calories VARCHAR(255), " +
