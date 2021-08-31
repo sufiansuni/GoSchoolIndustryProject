@@ -10,6 +10,7 @@ func main() {
 	createUserTable()
 	createSessionTable()
 	createRestaurantTable()
+	createFoodTable()
 
 	//Start HTTP Server
 	StartHTTPServer()
