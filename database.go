@@ -113,3 +113,21 @@ func createRestaurantTable() {
 		fmt.Println("Table Checked/Created: restaurants")
 	}
 }
+func createFoodTable() {
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+		"Food" +
+		" (" +
+		"ID VARCHAR(255) PRIMARY KEY, " +
+		"Name VARCHAR(255), " +
+		"Price FLOAT, " +
+		"Calories VARCHAR(255), " +
+		"Halal BOOL, " +
+		"Vegan BOOL " +
+		")")
+
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Table Checked/Created: Food")
+	}
+}
