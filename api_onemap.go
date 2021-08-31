@@ -17,6 +17,9 @@ import (
 // OneMap API testsite: https://app.swaggerhub.com/apis/onemap-sg/new-onemap-api/1.0.4
 // Structs formed with the assistance of https://mholt.github.io/json-to-go/
 
+var API_ONEMAP_EMAIL string = "email@email.com"
+var API_ONEMAP_PASSWORD string = "password"
+
 type API_OneMap_Search_Result struct {
 	Found         int `json:"found"`
 	Totalnumpages int `json:"totalNumPages"`
@@ -82,8 +85,8 @@ func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 
 	url := "https://developers.onemap.sg/privateapi/auth/post/getToken"
 	values := map[string]string{
-		"email":    goDotEnvVariable("API_ONEMAP_EMAIL"),
-		"password": goDotEnvVariable("API_ONEMAP_PASSWORD"),
+		"email":    API_ONEMAP_EMAIL,
+		"password": API_ONEMAP_PASSWORD,
 	}
 	jsonValue, _ := json.Marshal(values)
 	if resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue)); err == nil {
