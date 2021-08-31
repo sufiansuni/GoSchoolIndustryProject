@@ -14,7 +14,7 @@ var DATABASE_HOST string = "localhost"
 var DATABASE_PORT string = "3306"
 var DATABASE_NAME string = "my_db"
 
-//connects to the database according to set values
+// Connects to the database according to set values
 func connectDatabase() {
 	user := DATABASE_USER
 	password := DATABASE_PASSWORD
@@ -23,12 +23,12 @@ func connectDatabase() {
 	dbname := DATABASE_NAME
 	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
 
-	//additional parameters
+	// additional parameters
 	connectionstring += "?parseTime=True&loc=Local"
 	var err error
 	db, err = sql.Open("mysql", connectionstring)
 
-	//if there is an error opening the connection, handle it
+	// if there is an error opening the connection, handle it
 	if err != nil {
 		panic(err)
 	} else {
@@ -36,7 +36,7 @@ func connectDatabase() {
 	}
 }
 
-//ping the database to test connection
+// Ping the database to test connection
 func pingDatabase() {
 	err := db.Ping()
 	if err != nil {
@@ -46,8 +46,7 @@ func pingDatabase() {
 	}
 }
 
-//creates "users" table
-
+// Creates "users" table in database
 func createUserTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"users" +
@@ -76,7 +75,7 @@ func createUserTable() {
 	}
 }
 
-//creates "sessions" table
+// Creates "sessions" table in database
 func createSessionTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"sessions" +
@@ -92,6 +91,7 @@ func createSessionTable() {
 	}
 }
 
+// Creates "restaurants" table in database
 func createRestaurantTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"restaurants" +

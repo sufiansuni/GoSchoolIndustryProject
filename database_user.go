@@ -2,10 +2,10 @@ package main
 
 // Operations for User database: Insert, Delete, Update
 
-//insert a new user entry
+// Insert a new user entry into database
 func insertUser(myUser user) error {
 
-	//set default value for birthday if blank
+	// set default value for birthday if blank
 	if myUser.Birthday == "" {
 		myUser.Birthday = "1000-01-01"
 	}

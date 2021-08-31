@@ -13,9 +13,9 @@ import (
 	geo "github.com/kellydunn/golang-geo"
 )
 
-//OneMAP API Documentation: https://www.onemap.gov.sg/docs/
-//OneMap API testsite: https://app.swaggerhub.com/apis/onemap-sg/new-onemap-api/1.0.4
-//structs formed with the assistance of https://mholt.github.io/json-to-go/
+// OneMAP API Documentation: https://www.onemap.gov.sg/docs/
+// OneMap API testsite: https://app.swaggerhub.com/apis/onemap-sg/new-onemap-api/1.0.4
+// Structs formed with the assistance of https://mholt.github.io/json-to-go/
 
 type API_OneMap_Search_Result struct {
 	Found         int `json:"found"`
@@ -45,12 +45,12 @@ type API_OneMap_Error_Result struct {
 	Error string `json:"error"`
 }
 
-//Function sends GET request to OneMap Search API and returns the unmarshaled json response
+// Function sends GET request to OneMap Search API and returns the unmarshaled json response
 func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
 	
 	var result API_OneMap_Search_Result
 
-	//make string safe for http query
+	// make string safe for http query
 	search_val = url.QueryEscape(search_val)
 
 	my_url := "https://developers.onemap.sg/commonapi/search?searchVal=" + search_val + "&returnGeom=Y&getAddrDetails=Y"
@@ -74,8 +74,8 @@ func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
 	}
 }
 
-//Function sends POST request to OneMap GetToken API and returns the unmarshaled json response
-//requires email and password in .env file
+// Function sends POST request to OneMap GetToken API and returns the unmarshaled json response.
+// Requires email and password in .env file
 func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 
 	var result API_OneMap_GetToken_Result
@@ -106,10 +106,10 @@ func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 	}
 }
 
-//Function makes use of API_TomTom_Routing and processes function inputs.
-//Returns a suitable request string to OneMAP Static Map API
-//Note that the result the above request is of PNG format.
-//Pass it to a html template. Eg: <img src = {{.}} alt="Map">
+// Function makes use of API_TomTom_Routing and processes function inputs.
+// Returns a suitable request string to OneMAP Static Map API.
+// Note that the result the above request is of PNG format.
+// Pass it to a html template. Eg: <img src = {{.}} alt="Map">
 func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat string, end_lng string) string {
 
 	route, err := API_TomTom_Routing(start_lat, start_lng, end_lat, end_lng)
@@ -150,7 +150,7 @@ func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat strin
 	return MapPNG
 }
 
-//Function will convert string inputs into Point type and return a mid-point
+// Convert string inputs into Point type and return a mid-point
 func find_mid(start_lat string, start_lng string, end_lat string, end_lng string) (string, string, error) {
 
 	start_lat_conv, err := strconv.ParseFloat(start_lat, 64)

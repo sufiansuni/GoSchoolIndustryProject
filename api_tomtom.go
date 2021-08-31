@@ -50,7 +50,7 @@ type API_TomTom_Routing_Result struct {
 	} `json:"routes"`
 }
 
-//Function sends GET request to TomTom Routing API and returns the unmarshaled json response
+// Sends GET request to TomTom Routing API and returns the unmarshaled json response
 func API_TomTom_Routing(start_lat string, start_lng string, end_lat string, end_lng string) (API_TomTom_Routing_Result, error) {
 	
 	var result API_TomTom_Routing_Result
