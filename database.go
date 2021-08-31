@@ -57,13 +57,13 @@ func createUserTable() {
 		"Last VARCHAR(255), " +
 		"Gender VARCHAR(6), " +
 		"Birthday DATE, " +
-		"Height SMALLINT, " +
-		"Weight SMALLINT, " +
-		"CaloriesPerDay FLOAT, " +
+		"Height SMALLINT UNSIGNED, " +
+		"Weight SMALLINT UNSIGNED, " +
+		"CaloriesPerDay FLOAT UNSIGNED, " +
 		"Halal BOOL, " +
 		"Vegan BOOL, " +
 		"Address VARCHAR(255), " +
-		"PostalCode MEDIUMINT, " +
+		"PostalCode MEDIUMINT UNSIGNED, " +
 		"Lat FLOAT, " +
 		"Lng FLOAT" +
 		")")
@@ -96,13 +96,13 @@ func createRestaurantTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
 		"restaurants" +
 		" (" +
-		"ID VARCHAR(255) PRIMARY KEY, " +
+		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
 		"Name VARCHAR(255), " +
 		"Description VARCHAR(255), " +
 		"Halal BOOL, " +
 		"Vegan BOOL, " +
 		"Address VARCHAR(255), " +
-		"PostalCode MEDIUMINT, " +
+		"PostalCode MEDIUMINT UNSIGNED, " +
 		"Lat FLOAT, " +
 		"Lng FLOAT" +
 		")")
@@ -113,15 +113,17 @@ func createRestaurantTable() {
 		fmt.Println("Table Checked/Created: restaurants")
 	}
 }
+
+// Creates "foods" table in database
 func createFoodTable() {
 	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
-		"Food" +
+		"foods" +
 		" (" +
-		"ID VARCHAR(255) PRIMARY KEY, " +
+		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
 		"RestaurantID VARCHAR(255), " +
 		"Name VARCHAR(255), " +
-		"Price FLOAT, " +
-		"Calories VARCHAR(255), " +
+		"Price FLOAT UNSIGNED, " +
+		"Calories FLOAT UNSIGNED, " +
 		"Halal BOOL, " +
 		"Vegan BOOL " +
 		")")
@@ -129,6 +131,6 @@ func createFoodTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: Food")
+		fmt.Println("Table Checked/Created: foods")
 	}
 }
