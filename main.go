@@ -11,6 +11,8 @@ func main() {
 	createSessionTable()
 	createRestaurantTable()
 	createFoodTable()
+	createOrderTable()
+	createOrderItemTable()
 
 	//Start HTTP Server
 	StartHTTPServer()

@@ -2,3 +2,5 @@ main.exe
 main
 .env
 env
+DS_Store
+.vscode

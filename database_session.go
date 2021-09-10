@@ -42,7 +42,7 @@ func updateSession(mySession session) error {
 
 // Delete a session entry in database
 func deleteSession(UUID string) error {
-	_, err := db.Exec("DELETE FROM sessions where UUID=?",
+	_, err := db.Exec("DELETE FROM sessions WHERE UUID=?",
 		UUID)
 	if err != nil {
 		return err

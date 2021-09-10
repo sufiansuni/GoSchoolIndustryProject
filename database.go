@@ -59,6 +59,7 @@ func createUserTable() {
 		"Birthday DATE, " +
 		"Height SMALLINT UNSIGNED, " +
 		"Weight SMALLINT UNSIGNED, " +
+		"ActivityLevel SMALLINT UNSIGNED, " +
 		"CaloriesPerDay FLOAT UNSIGNED, " +
 		"Halal BOOL, " +
 		"Vegan BOOL, " +
@@ -120,7 +121,7 @@ func createFoodTable() {
 		"foods" +
 		" (" +
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
-		"RestaurantID VARCHAR(255), " +
+		"RestaurantID MEDIUMINT UNSIGNED, " +
 		"Name VARCHAR(255), " +
 		"Price FLOAT UNSIGNED, " +
 		"Calories FLOAT UNSIGNED, " +
@@ -132,5 +133,46 @@ func createFoodTable() {
 		panic(err)
 	} else {
 		fmt.Println("Table Checked/Created: foods")
+	}
+}
+
+// Creates "orders" table in database
+func createOrderTable() {
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+		"orders" +
+		" (" +
+		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
+		"Username VARCHAR(255), " +
+		"Status VARCHAR(255), " + // cart, past
+		"Date DATE, " +
+		"Address VARCHAR(255), " +
+		"PostalCode MEDIUMINT UNSIGNED, " +
+		"Lat FLOAT, " +
+		"Lng FLOAT" +
+		")")
+
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Table Checked/Created: orders")
+	}
+}
+
+// Creates "order_items" table in database
+func createOrderItemTable() {
+	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+		"order_items" +
+		" (" +
+		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
+		"OrderID MEDIUMINT UNSIGNED, " +
+		"FoodID MEDIUMINT UNSIGNED, " +
+		"Quantity SMALLINT UNSIGNED, " +
+		"Subtotal FLOAT UNSIGNED" +
+		")")
+
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("Table Checked/Created: order_items")
 	}
 }

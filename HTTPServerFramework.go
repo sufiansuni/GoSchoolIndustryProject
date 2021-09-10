@@ -26,6 +26,7 @@ type user struct {
 	Birthday       string
 	Height         int
 	Weight         float64
+	ActivityLevel  int
 	CaloriesPerDay int
 	Halal          bool
 	Vegan          bool
@@ -155,7 +156,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				fmt.Println("Session Created")
 			}
 
-			//check password
+			//encrypt password
 			bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 			if err != nil {
 				fmt.Println(err)
@@ -314,6 +315,7 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 			&myUser.Birthday,
 			&myUser.Height,
 			&myUser.Weight,
+			&myUser.ActivityLevel,
 			&myUser.CaloriesPerDay,
 			&myUser.Halal,
 			&myUser.Vegan,
