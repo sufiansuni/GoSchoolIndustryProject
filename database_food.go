@@ -3,8 +3,8 @@ package main
 // Operations for food database: Insert(Create), Select(Read), Update, Delete
 
 type food struct {
-	ID           string //primary key
-	RestaurantID string //foreign key
+	ID           int //primary key
+	RestaurantID int //foreign key
 	Name         string
 	Price        float64
 	Calories     float64
@@ -14,15 +14,15 @@ type food struct {
 
 // Insert a new restaurant entry into database
 func insertFood(myFood food) error {
-	statement := "INSERT INTO food(ID, RestaurantID,Name, Price, Calories, Halal, Vegan) VALUES(?, ?, ?, ?, ?, ?, ?)"
+	statement := "INSERT INTO foods (RestaurantID, Name, Price, Calories, Halal, Vegan) VALUES(?, ?, ?, ?, ?, ?)"
 	_, err := db.Exec(statement,
-		myFood.ID,
-		myFood.Name,
 		myFood.RestaurantID,
+		myFood.Name,
 		myFood.Price,
 		myFood.Calories,
 		myFood.Halal,
-		myFood.Vegan)
+		myFood.Vegan,
+	)
 	if err != nil {
 		return err
 	}
@@ -30,9 +30,9 @@ func insertFood(myFood food) error {
 }
 
 // Select/Read a food entry from database with a ID input
-func selectFood(ID string) (food, error) {
+func selectFood(ID int) (food, error) {
 	var myFood food
-	query := "SELECT * FROM food WHERE ID=?"
+	query := "SELECT * FROM foods WHERE ID=?"
 
 	err := db.QueryRow(query, ID).Scan(
 		&myFood.ID,
@@ -41,24 +41,24 @@ func selectFood(ID string) (food, error) {
 		&myFood.Price,
 		&myFood.Calories,
 		&myFood.Halal,
-		&myFood.Vegan)
+		&myFood.Vegan,
+	)
 	return myFood, err
 }
 
 // Update a restaurant entry in database
-
 func updateFood(myFood food) error {
-	statement := "UPDATE food SET Name=?, RestaurantID=? Price =?, Calories =?, Halal=?, Vegan=? " +
+	statement := "UPDATE foods SET RestaurantID=?, Name?, Price =?, Calories =?, Halal=?, Vegan=? " +
 		"WHERE ID=?"
 
 	_, err := db.Exec(statement,
-		myFood.ID,
-		myFood.Name,
 		myFood.RestaurantID,
 		myFood.Price,
 		myFood.Calories,
 		myFood.Halal,
-		myFood.Vegan)
+		myFood.Vegan,
+		myFood.ID,
+	)
 	if err != nil {
 		return err
 	}
@@ -66,8 +66,8 @@ func updateFood(myFood food) error {
 }
 
 // Delete a restaurant entry in database
-func deleteFood(ID string) error {
-	_, err := db.Exec("DELETE FROM food where ID=?",
+func deleteFood(ID int) error {
+	_, err := db.Exec("DELETE FROM foods WHERE ID=?",
 		ID)
 	if err != nil {
 		return err
