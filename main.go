@@ -1,19 +1,21 @@
 package main
 
-func main() {
-	//Begin connection to database, then ping to test
-	connectDatabase()
-	defer db.Close()
-	pingDatabase()
+import (
+	"GoIndustryProject/controllers"
+	"GoIndustryProject/database"
+)
 
-	//create tables in database
-	createUserTable()
-	createSessionTable()
-	createRestaurantTable()
-	createFoodTable()
-	createOrderTable()
-	createOrderItemTable()
+func main() {
+	//Begin connection to database, defer close
+	database.Connect()
+	defer database.DB.Close()
+
+	//Ping to test connection
+	database.Ping()
+
+	//Initialise tables and admin account
+	database.Init()
 
 	//Start HTTP Server
-	StartHTTPServer()
+	controllers.StartHTTPServer()
 }

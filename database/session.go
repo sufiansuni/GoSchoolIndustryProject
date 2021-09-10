@@ -1,10 +1,14 @@
-package main
+package database
+
+import (
+	"GoIndustryProject/models"
+)
 
 // Operations for sessions database: Insert(Create), Select(Read), Update, Delete
 
 // Insert a new session entry into database
-func insertSession(mySession session) error {
-	_, err := db.Exec("INSERT INTO sessions(UUID, Username) VALUES(?, ?)",
+func InsertSession(mySession models.Session) error {
+	_, err := DB.Exec("INSERT INTO sessions(UUID, Username) VALUES(?, ?)",
 		mySession.UUID, mySession.Username)
 	if err != nil {
 		return err
@@ -13,11 +17,11 @@ func insertSession(mySession session) error {
 }
 
 // Select/Read a session entry from database with a UUID input
-func selectSession(UUID string) (session, error) {
-	var mySession session
+func SelectSession(UUID string) (models.Session, error) {
+	var mySession models.Session
 	query := "SELECT * FROM sessions WHERE UUID=?"
 
-	err := db.QueryRow(query, UUID).Scan(
+	err := DB.QueryRow(query, UUID).Scan(
 		&mySession.UUID,
 		&mySession.Username,
 	)
@@ -26,11 +30,11 @@ func selectSession(UUID string) (session, error) {
 
 // Update a session entry in database
 
-func updateSession(mySession session) error {
+func UpdateSession(mySession models.Session) error {
 	statement := "UPDATE sessions SET Username=? " +
 		"WHERE UUID=?"
 
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		mySession.Username,
 		mySession.UUID,
 	)
@@ -41,8 +45,8 @@ func updateSession(mySession session) error {
 }
 
 // Delete a session entry in database
-func deleteSession(UUID string) error {
-	_, err := db.Exec("DELETE FROM sessions WHERE UUID=?",
+func DeleteSession(UUID string) error {
+	_, err := DB.Exec("DELETE FROM sessions WHERE UUID=?",
 		UUID)
 	if err != nil {
 		return err

@@ -1,8 +1,8 @@
-package main
+package models
 
 // Operations for order_items database: Insert(Create), Select(Read), Update, Delete
 
-type order_item struct {
+type OrderItem struct {
 	ID       int
 	OrderID  int
 	FoodID   int

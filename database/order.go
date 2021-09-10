@@ -1,23 +1,14 @@
-package main
+package database
+
+import "GoIndustryProject/models"
 
 // Operations for orders database: Insert(Create), Select(Read), Update, Delete
 
-type order struct {
-	ID         int
-	Username   string
-	Status     string
-	Date       string
-	Address    string
-	PostalCode int
-	Lat        float64
-	Lng        float64
-}
-
 // Insert a new order entry into database
-func insertOrder(myOrder order) error {
+func InsertOrder(myOrder models.Order) error {
 
 	statement := "INSERT INTO orders (Username, Status, Date, Address, PostalCode, Lat, Lng) VALUES (?,?,?,?,?,?,?)"
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		myOrder.Username,
 		myOrder.Status,
 		myOrder.Date,
@@ -33,12 +24,12 @@ func insertOrder(myOrder order) error {
 }
 
 // Select/Read order entries from database with a username and status input
-func selectOrders(username string, status string) ([]order, error) {
-	var myOrder order
-	var myOrders []order
+func SelectOrders(username string, status string) ([]models.Order, error) {
+	var myOrder models.Order
+	var myOrders []models.Order
 
 	query := "SELECT * FROM orders WHERE Username=? AND Status=?"
-	results, err := db.Query(query, username, status)
+	results, err := DB.Query(query, username, status)
 	if err != nil {
 		return myOrders, err
 	}
@@ -63,12 +54,12 @@ func selectOrders(username string, status string) ([]order, error) {
 }
 
 // Update an order entry in database
-func updateOrder(myOrder order) error {
+func UpdateOrder(myOrder models.Order) error {
 	statement := "UPDATE orders SET Username=?, Status=?, Date=?, " +
 		"Address=?, PostalCode=?,  Lat=?, Lng=? " +
 		"WHERE ID=?"
 
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		myOrder.Username,
 		myOrder.Status,
 		myOrder.Date,
@@ -85,8 +76,8 @@ func updateOrder(myOrder order) error {
 }
 
 // Delete an order entry in database
-func deleteOrder(orderID int) error {
-	_, err := db.Exec("DELETE FROM orders WHERE ID=?",
+func DeleteOrder(orderID int) error {
+	_, err := DB.Exec("DELETE FROM orders WHERE ID=?",
 		orderID)
 	if err != nil {
 		return err
