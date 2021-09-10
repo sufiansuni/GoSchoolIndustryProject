@@ -1,24 +1,28 @@
-package main
+package database
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"GoIndustryProject/models"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 // Operations for users database: Insert(Create), Select(Read), Update, Delete
 
 // Insert a new user entry into database
-func insertUser(myUser user) error {
+func InsertUser(myUser models.User) error {
 
 	// set default value for birthday if blank
 	if myUser.Birthday == "" {
 		myUser.Birthday = "1000-01-01"
 	}
 
-	// set default value for activity level if blank
+	// set default value for activity level if 0
 	if myUser.ActivityLevel == 0 {
 		myUser.ActivityLevel = 1
 	}
 
 	statement := "INSERT INTO users (Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, PostalCode, Lat, Lng) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		myUser.Username,
 		myUser.Password,
 		myUser.First,
@@ -43,11 +47,11 @@ func insertUser(myUser user) error {
 }
 
 // Select/Read a user entry from database with a username input
-func selectUser(username string) (user, error) {
-	var myUser user
+func SelectUser(username string) (models.User, error) {
+	var myUser models.User
 	query := "SELECT * FROM users WHERE Username=?"
 
-	err := db.QueryRow(query, username).Scan(
+	err := DB.QueryRow(query, username).Scan(
 		&myUser.Username,
 		&myUser.Password,
 		&myUser.First,
@@ -70,12 +74,12 @@ func selectUser(username string) (user, error) {
 
 // Update a user entry in database
 // Does not include username and password
-func updateUserProfile(myUser user) error {
+func UpdateUserProfile(myUser models.User) error {
 	statement := "UPDATE users SET First=?, Last=?, Gender=?, Birthday=?, " +
 		"Height=?, Weight=?, ActivityLevel=?, CaloriesPerday=?, Halal=?, Vegan=?, Address=?, PostalCode=?,  Lat=?, Lng=? " +
 		"WHERE Username=?"
 
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		myUser.First,
 		myUser.Last,
 		myUser.Gender,
@@ -99,12 +103,12 @@ func updateUserProfile(myUser user) error {
 }
 
 // Update a users password entry
-func updateUserPassword(username string, oldPassword string, newPassword string) error {
+func UpdateUserPassword(username string, oldPassword string, newPassword string) error {
 	//find stored password
 	var dbPassword []byte
 	query := "SELECT Password FROM users WHERE Username=?"
 
-	err := db.QueryRow(query, username).Scan(
+	err := DB.QueryRow(query, username).Scan(
 		&dbPassword,
 	)
 	if err != nil {
@@ -122,7 +126,7 @@ func updateUserPassword(username string, oldPassword string, newPassword string)
 		}
 		statement := "UPDATE users SET Password=? WHERE Username=?"
 
-		_, err = db.Exec(statement,
+		_, err = DB.Exec(statement,
 			bNewPassword,
 			username,
 		)
@@ -134,11 +138,13 @@ func updateUserPassword(username string, oldPassword string, newPassword string)
 }
 
 // Delete a user entry in database
-func deleteUser(username string) error {
-	_, err := db.Exec("DELETE FROM users WHERE Username=?",
+func DeleteUser(username string) error {
+	_, err := DB.Exec("DELETE FROM users WHERE Username=?",
 		username)
 	if err != nil {
 		return err
 	}
 	return nil
 }
+
+

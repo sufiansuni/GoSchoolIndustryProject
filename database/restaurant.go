@@ -1,23 +1,13 @@
-package main
+package database
+
+import "GoIndustryProject/models"
 
 // Operations for restaurant database: Insert(Create), Select(Read), Update, Delete
 
-type restaurant struct {
-	ID          int
-	Name        string //primary key
-	Description string
-	Halal       bool
-	Vegan       bool
-	Address     string
-	PostalCode  int
-	Lat         float64
-	Lng         float64
-}
-
 // Insert a new restaurant entry into database
-func insertRestaurant(myRestaurant restaurant) error {
+func InsertRestaurant(myRestaurant models.Restaurant) error {
 	statement := "INSERT INTO restaurants (Name, Description, Halal, Vegan, Address, PostalCode, Lat, Lng) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		myRestaurant.Name,
 		myRestaurant.Description,
 		myRestaurant.Halal,
@@ -33,11 +23,11 @@ func insertRestaurant(myRestaurant restaurant) error {
 }
 
 // Select/Read a restaurant entry from database with a ID input
-func selectRestaurant(ID int) (restaurant, error) {
-	var myRestaurant restaurant
+func SelectRestaurant(ID int) (models.Restaurant, error) {
+	var myRestaurant models.Restaurant
 	query := "SELECT * FROM restaurants WHERE ID=?"
 
-	err := db.QueryRow(query, ID).Scan(
+	err := DB.QueryRow(query, ID).Scan(
 		&myRestaurant.ID,
 		&myRestaurant.Name,
 		&myRestaurant.Description,
@@ -53,11 +43,11 @@ func selectRestaurant(ID int) (restaurant, error) {
 
 // Update a restaurant entry in database
 
-func updateRestaurant(myRestaurant restaurant) error {
+func UpdateRestaurant(myRestaurant models.Restaurant) error {
 	statement := "UPDATE restaurants SET Name=?, Description =?, Halal=?, Vegan=?, Address=?, PostalCode=?, Lat =?, Lng=? " +
 		"WHERE ID=?"
 
-	_, err := db.Exec(statement,
+	_, err := DB.Exec(statement,
 		myRestaurant.Name,
 		myRestaurant.Description,
 		myRestaurant.Halal,
@@ -75,8 +65,8 @@ func updateRestaurant(myRestaurant restaurant) error {
 }
 
 // Delete a restaurant entry in database
-func deleteRestaurant(ID int) error {
-	_, err := db.Exec("DELETE FROM restaurants WHERE ID=?",
+func DeleteRestaurant(ID int) error {
+	_, err := DB.Exec("DELETE FROM restaurants WHERE ID=?",
 		ID)
 	if err != nil {
 		return err

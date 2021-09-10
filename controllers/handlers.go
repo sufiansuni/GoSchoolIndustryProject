@@ -1,88 +1,16 @@
-package main
-
-// Basic HTTP Server Framework with the following functionality:
-// Login/Logout
-// Signup
-// "Restricted Page" is a test page, to be removed
+package controllers
 
 import (
+	"GoIndustryProject/apis"
+	"GoIndustryProject/database"
+	"GoIndustryProject/models"
 	"database/sql"
 	"fmt"
-	"html/template"
-	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type user struct {
-	Username       string //primary key
-	Password       []byte
-	First          string
-	Last           string
-	Gender         string
-	Birthday       string
-	Height         int
-	Weight         float64
-	ActivityLevel  int
-	CaloriesPerDay int
-	Halal          bool
-	Vegan          bool
-	Address        string
-	PostalCode     int
-	Lat            float64
-	Lng            float64
-}
-
-type session struct {
-	UUID     string //primary key
-	Username string //foreign key
-}
-
-var tpl *template.Template
-
-// Pre-Database: var mapUsers = map[string]user{}
-// Pre-Database: var mapSessions = map[string]string{}
-
-// Creates initial admin account. If account already exist, error will be printed.
-func createAdminAccount() {
-	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
-	myUser := user{
-		Username: "admin",
-		Password: bPassword,
-		First:    "first",
-		Last:     "last",
-	}
-	err := insertUser(myUser) //previously mapUsers["admin"] = myUser
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println("Admin Account Created")
-	}
-}
-
-// Init Function for HTTP Server Functionality. Init templates and admin account.
-func HTTPServerInit() {
-	tpl = template.Must(template.ParseGlob("templates/*"))
-	createAdminAccount() // Create Admin Account, Previously: mapUsers["admin"] = user{"admin", bPassword, "admin", "admin"}
-}
-
-// Map handlers and start the http server
-func StartHTTPServer() {
-	HTTPServerInit()
-	r := mux.NewRouter() //New Router Instance
-	r.HandleFunc("/", index)
-	r.HandleFunc("/restricted", restricted)
-	r.HandleFunc("/signup", signup)
-	r.HandleFunc("/login", login)
-	r.HandleFunc("/logout", logout)
-	r.Handle("/favicon.ico", http.NotFoundHandler())
-	r.HandleFunc("/testmap", testmap)
-
-	log.Fatal(http.ListenAndServe(":8080", r))
-}
 
 // Handles request of index/homepage
 func index(res http.ResponseWriter, req *http.Request) {
@@ -108,7 +36,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var myUser user
+	var myUser models.User
 	// process form submission
 	if req.Method == http.MethodPost {
 		// get form values
@@ -122,7 +50,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 
 			query := "SELECT Username FROM users WHERE Username=?"
 
-			err := db.QueryRow(query, username).Scan(&checker)
+			err := database.DB.QueryRow(query, username).Scan(&checker)
 			if err != nil {
 				if err != sql.ErrNoRows {
 					fmt.Println(err)
@@ -145,9 +73,12 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			}
 			http.SetCookie(res, myCookie)
 
-			mySession := session{myCookie.Value, username}
+			mySession := models.Session{
+				UUID:     myCookie.Value,
+				Username: username,
+			}
 
-			err = insertSession(mySession) // previously: mapSessions[myCookie.Value] = username
+			err = database.InsertSession(mySession) // previously: mapSessions[myCookie.Value] = username
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -164,14 +95,14 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			myUser = user{
+			myUser = models.User{
 				Username: username,
 				Password: bPassword,
 				First:    firstname,
 				Last:     lastname,
 			}
 
-			err = insertUser(myUser) // previouslymapUsers[username] = myUser
+			err = database.InsertUser(myUser) // previouslymapUsers[username] = myUser
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -201,10 +132,10 @@ func login(res http.ResponseWriter, req *http.Request) {
 		username := req.FormValue("username")
 		password := req.FormValue("password")
 		// check if user exist with username
-		var checker user
+		var checker models.User
 
 		query := "SELECT Username, Password FROM users WHERE Username=?"
-		err := db.QueryRow(query, username).Scan(
+		err := database.DB.QueryRow(query, username).Scan(
 			&checker.Username,
 			&checker.Password,
 		)
@@ -230,8 +161,12 @@ func login(res http.ResponseWriter, req *http.Request) {
 		}
 		http.SetCookie(res, myCookie)
 
-		mySession := session{myCookie.Value, username}
-		err = insertSession(mySession) // previously: mapSessions[myCookie.Value] = username
+		mySession := models.Session{
+			UUID:     myCookie.Value,
+			Username: username,
+		}
+
+		err = database.InsertSession(mySession) // previously: mapSessions[myCookie.Value] = username
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -257,7 +192,7 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 
-	err := deleteSession(myCookie.Value)
+	err := database.DeleteSession(myCookie.Value)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -277,7 +212,7 @@ func logout(res http.ResponseWriter, req *http.Request) {
 
 // Locates user's cookie and check against session data. Creates cookie if not present.
 // If user is found, returns the user data.
-func checkUser(res http.ResponseWriter, req *http.Request) user {
+func checkUser(res http.ResponseWriter, req *http.Request) models.User {
 	// get current session cookie
 	myCookie, err := req.Cookie("myCookie")
 	if err != nil {
@@ -291,10 +226,10 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 
 	// if the user exists already, get user
 	var checker string
-	var myUser user
+	var myUser models.User
 
 	query := "SELECT Username FROM sessions WHERE UUID=?"
-	err = db.QueryRow(query, myCookie.Value).Scan(&checker)
+	err = database.DB.QueryRow(query, myCookie.Value).Scan(&checker)
 
 	if err != nil {
 		if err != sql.ErrNoRows {
@@ -306,7 +241,7 @@ func checkUser(res http.ResponseWriter, req *http.Request) user {
 	} else {
 		query = "SELECT * FROM users WHERE Username=?"
 
-		err = db.QueryRow(query, checker).Scan(
+		err = database.DB.QueryRow(query, checker).Scan(
 			&myUser.Username,
 			&myUser.Password,
 			&myUser.First,
@@ -348,7 +283,7 @@ func alreadyLoggedIn(req *http.Request) bool {
 
 	query := "SELECT Username FROM sessions WHERE UUID=?"
 
-	err = db.QueryRow(query, myCookie.Value).Scan(&checker)
+	err = database.DB.QueryRow(query, myCookie.Value).Scan(&checker)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			fmt.Print(err)
@@ -358,7 +293,7 @@ func alreadyLoggedIn(req *http.Request) bool {
 	} else {
 		query = "SELECT Username FROM users WHERE Username=?"
 
-		err = db.QueryRow(query, checker).Scan(&checker)
+		err = database.DB.QueryRow(query, checker).Scan(&checker)
 		if err != nil {
 			fmt.Print(err)
 		} else {
@@ -366,4 +301,25 @@ func alreadyLoggedIn(req *http.Request) bool {
 		}
 	}
 	return false
+}
+
+func testmap(res http.ResponseWriter, req *http.Request) {
+
+	search1, err := apis.OneMapSearch("13 Marsiling Lane")
+	if err != nil {
+		fmt.Println(err)
+	}
+	search2, err := apis.OneMapSearch("Woodlands MRT NS9")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	start_lat := search1.Results[0].Latitude
+	start_lng := search1.Results[0].Longitude
+
+	end_lat := search2.Results[0].Latitude
+	end_lng := search2.Results[0].Longitude
+
+	MapPNG := apis.OneMapGenerateMapPNG(start_lat, start_lng, end_lat, end_lng)
+	tpl.ExecuteTemplate(res, "testmap.html", MapPNG)
 }

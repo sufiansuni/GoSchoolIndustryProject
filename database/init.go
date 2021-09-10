@@ -1,54 +1,44 @@
-package main
+package database
 
 import (
-	"database/sql"
+	"GoIndustryProject/models"
 	"fmt"
 
-	_ "github.com/go-sql-driver/mysql"
+	"golang.org/x/crypto/bcrypt"
 )
 
-var db *sql.DB
-var DATABASE_USER string = "root"
-var DATABASE_PASSWORD string = "password"
-var DATABASE_HOST string = "localhost"
-var DATABASE_PORT string = "3306"
-var DATABASE_NAME string = "my_db"
+// Initialize tables and admin account
+func Init() {
+	CreateUserTable()
+	CreateSessionTable()
+	CreateRestaurantTable()
+	CreateFoodTable()
+	CreateOrderTable()
+	CreateOrderItemTable()
 
-// Connects to the database according to set values
-func connectDatabase() {
-	user := DATABASE_USER
-	password := DATABASE_PASSWORD
-	host := DATABASE_HOST
-	port := DATABASE_PORT
-	dbname := DATABASE_NAME
-	connectionstring := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
-
-	// additional parameters
-	connectionstring += "?parseTime=True&loc=Local"
-	var err error
-	db, err = sql.Open("mysql", connectionstring)
-
-	// if there is an error opening the connection, handle it
-	if err != nil {
-		panic(err)
-	} else {
-		fmt.Println("Database Opened")
-	}
+	CreateAdminAccount()
 }
 
-// Ping the database to test connection
-func pingDatabase() {
-	err := db.Ping()
+// Creates initial admin account. If account already exist, error will be printed.
+func CreateAdminAccount() {
+	bPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.MinCost)
+	myUser := models.User{
+		Username: "admin",
+		Password: bPassword,
+		First:    "first",
+		Last:     "last",
+	}
+	err := InsertUser(myUser) //previously mapUsers["admin"] = myUser
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	} else {
-		fmt.Println("Database Ping Successful")
+		fmt.Println("Admin Account Created")
 	}
 }
 
 // Creates "users" table in database
-func createUserTable() {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+func CreateUserTable() {
+	_, err := DB.Exec("CREATE TABLE IF NOT EXISTS " +
 		"users" +
 		" (" +
 		"Username VARCHAR(255) PRIMARY KEY, " +
@@ -72,13 +62,13 @@ func createUserTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: users")
+		fmt.Println("Table Exists/Created: users")
 	}
 }
 
 // Creates "sessions" table in database
-func createSessionTable() {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+func CreateSessionTable() {
+	_, err := DB.Exec("CREATE TABLE IF NOT EXISTS " +
 		"sessions" +
 		" (" +
 		"UUID VARCHAR(255) PRIMARY KEY, " +
@@ -88,13 +78,13 @@ func createSessionTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: sessions")
+		fmt.Println("Table Exists/Created: sessions")
 	}
 }
 
 // Creates "restaurants" table in database
-func createRestaurantTable() {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+func CreateRestaurantTable() {
+	_, err := DB.Exec("CREATE TABLE IF NOT EXISTS " +
 		"restaurants" +
 		" (" +
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
@@ -111,13 +101,13 @@ func createRestaurantTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: restaurants")
+		fmt.Println("Table Exists/Created: restaurants")
 	}
 }
 
 // Creates "foods" table in database
-func createFoodTable() {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+func CreateFoodTable() {
+	_, err := DB.Exec("CREATE TABLE IF NOT EXISTS " +
 		"foods" +
 		" (" +
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
@@ -132,13 +122,13 @@ func createFoodTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: foods")
+		fmt.Println("Table Exists/Created: foods")
 	}
 }
 
 // Creates "orders" table in database
-func createOrderTable() {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+func CreateOrderTable() {
+	_, err := DB.Exec("CREATE TABLE IF NOT EXISTS " +
 		"orders" +
 		" (" +
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
@@ -154,13 +144,13 @@ func createOrderTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: orders")
+		fmt.Println("Table Exists/Created: orders")
 	}
 }
 
 // Creates "order_items" table in database
-func createOrderItemTable() {
-	_, err := db.Exec("CREATE TABLE IF NOT EXISTS " +
+func CreateOrderItemTable() {
+	_, err := DB.Exec("CREATE TABLE IF NOT EXISTS " +
 		"order_items" +
 		" (" +
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
@@ -173,6 +163,6 @@ func createOrderItemTable() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("Table Checked/Created: order_items")
+		fmt.Println("Table Exists/Created: order_items")
 	}
 }

@@ -1,4 +1,4 @@
-package main
+package apis
 
 import (
 	"bytes"
@@ -17,10 +17,10 @@ import (
 // OneMap API testsite: https://app.swaggerhub.com/apis/onemap-sg/new-onemap-api/1.0.4
 // Structs formed with the assistance of https://mholt.github.io/json-to-go/
 
-var API_ONEMAP_EMAIL string = "email@email.com"
-var API_ONEMAP_PASSWORD string = "password"
+var OneMapEmail string = "email@email.com"
+var OneMapPassword string = "password"
 
-type API_OneMap_Search_Result struct {
+type OneMapSearchResult struct {
 	Found         int `json:"found"`
 	Totalnumpages int `json:"totalNumPages"`
 	Pagenum       int `json:"pageNum"`
@@ -39,19 +39,19 @@ type API_OneMap_Search_Result struct {
 	} `json:"results"`
 }
 
-type API_OneMap_GetToken_Result struct {
+type OneMapGetTokenResult struct {
 	Access_Token     string `json:"access_token"`
 	Expiry_Timestamp string `json:"expiry_timestamp"`
 }
 
-type API_OneMap_Error_Result struct {
+type OneMapErrorResult struct {
 	Error string `json:"error"`
 }
 
 // Function sends GET request to OneMap Search API and returns the unmarshaled json response
-func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
-	
-	var result API_OneMap_Search_Result
+func OneMapSearch(search_val string) (OneMapSearchResult, error) {
+
+	var result OneMapSearchResult
 
 	// make string safe for http query
 	search_val = url.QueryEscape(search_val)
@@ -64,7 +64,7 @@ func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
 				json.Unmarshal(body, &result)
 				return result, err
 			} else {
-				var error_result API_OneMap_Error_Result
+				var error_result OneMapErrorResult
 				json.Unmarshal(body, &error_result)
 				err_msg := error_result.Error + " Status Code: " + strconv.Itoa(resp.StatusCode)
 				return result, errors.New(err_msg)
@@ -79,14 +79,14 @@ func API_OneMap_Search(search_val string) (API_OneMap_Search_Result, error) {
 
 // Function sends POST request to OneMap GetToken API and returns the unmarshaled json response.
 // Requires email and password in .env file
-func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
+func OneMap_GetToken() (OneMapGetTokenResult, error) {
 
-	var result API_OneMap_GetToken_Result
+	var result OneMapGetTokenResult
 
 	url := "https://developers.onemap.sg/privateapi/auth/post/getToken"
 	values := map[string]string{
-		"email":    API_ONEMAP_EMAIL,
-		"password": API_ONEMAP_PASSWORD,
+		"email":    OneMapEmail,
+		"password": OneMapPassword,
 	}
 	jsonValue, _ := json.Marshal(values)
 	if resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonValue)); err == nil {
@@ -96,7 +96,7 @@ func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 				json.Unmarshal(body, &result)
 				return result, err
 			} else {
-				var error_result API_OneMap_Error_Result
+				var error_result OneMapErrorResult
 				json.Unmarshal(body, &error_result)
 				err_msg := error_result.Error + " Status Code: " + strconv.Itoa(resp.StatusCode)
 				return result, errors.New(err_msg)
@@ -113,14 +113,14 @@ func API_OneMap_GetToken() (API_OneMap_GetToken_Result, error) {
 // Returns a suitable request string to OneMAP Static Map API.
 // Note that the result the above request is of PNG format.
 // Pass it to a html template. Eg: <img src = {{.}} alt="Map">
-func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat string, end_lng string) string {
+func OneMapGenerateMapPNG(start_lat string, start_lng string, end_lat string, end_lng string) string {
 
-	route, err := API_TomTom_Routing(start_lat, start_lng, end_lat, end_lng)
+	route, err := TomTomRouting(start_lat, start_lng, end_lat, end_lng)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	mid_lat, mid_lng, err := find_mid(start_lat,start_lng,end_lat,end_lng)
+	mid_lat, mid_lng, err := find_mid(start_lat, start_lng, end_lat, end_lng)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -135,9 +135,9 @@ func API_OneMap_GenerateMapPNG(start_lat string, start_lng string, end_lat strin
 	lines += "]:177,0,0:3" //Line R,G,B,Thickness
 
 	var points string
-	points += "[" + start_lat + "," + start_lng + ",%22"+ "175,50,0"+ "%22,%22" + "A"+ "%22]" //R,G,B,Label
+	points += "[" + start_lat + "," + start_lng + ",%22" + "175,50,0" + "%22,%22" + "A" + "%22]" //R,G,B,Label
 	points += "|"
-	points += "[" + end_lat + "," + end_lng + ",%22"+ "255,255,178" + "%22,%22" + "B" + "%22]" //R,G,B,Label
+	points += "[" + end_lat + "," + end_lng + ",%22" + "255,255,178" + "%22,%22" + "B" + "%22]" //R,G,B,Label
 
 	MapPNG := "https://developers.onemap.sg/commonapi/staticmap/getStaticImage?layerchosen=default&" +
 		"&lat=" + mid_lat +

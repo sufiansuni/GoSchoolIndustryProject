@@ -1,4 +1,4 @@
-package main
+package apis
 
 // TomTom: https://www.tomtom.com/
 // TomTom (Developers): https://developer.tomtom.com/
@@ -14,9 +14,9 @@ import (
 	"time"
 )
 
-var API_TOMTOM_TOKEN string = "CLk06Ah1CEtwbreYgedJ4VHY2ypDvaZ5"
+var TomTomToken string = "CLk06Ah1CEtwbreYgedJ4VHY2ypDvaZ5"
 
-type API_TomTom_Routing_Result struct {
+type TomTomRoutingResult struct {
 	Formatversion string `json:"formatVersion"`
 	Routes        []struct {
 		Summary struct {
@@ -51,9 +51,9 @@ type API_TomTom_Routing_Result struct {
 }
 
 // Sends GET request to TomTom Routing API and returns the unmarshaled json response
-func API_TomTom_Routing(start_lat string, start_lng string, end_lat string, end_lng string) (API_TomTom_Routing_Result, error) {
+func TomTomRouting(start_lat string, start_lng string, end_lat string, end_lng string) (TomTomRoutingResult, error) {
 	
-	var result API_TomTom_Routing_Result
+	var result TomTomRoutingResult
 
 	my_url := "https://api.tomtom.com/routing/1/calculateRoute/" +
 		start_lat + url.QueryEscape(",") +
@@ -61,7 +61,7 @@ func API_TomTom_Routing(start_lat string, start_lng string, end_lat string, end_
 		end_lat + url.QueryEscape(",") +
 		end_lng +
 		"/json?routeType=fastest&traffic=true&avoid=unpavedRoads&travelMode=pedestrian&key=" +
-		API_TOMTOM_TOKEN
+		TomTomToken
 
 	if resp, err := http.Get(my_url); err == nil {
 		defer resp.Body.Close()
