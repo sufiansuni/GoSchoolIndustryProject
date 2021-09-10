@@ -1,4 +1,4 @@
-# IndustryProjectTeam1
+# GoSchool Industry Project - Team 1
 
 ## Developers
 - Muhammad Sufian Bin Suni
