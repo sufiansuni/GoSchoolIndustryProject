@@ -18,3 +18,15 @@ type User struct {
 	Lat            float64
 	Lng            float64
 }
+
+func (myUser *User) FillDefaults() {
+	// set default value for birthday if blank
+	if myUser.Birthday == "" {
+		myUser.Birthday = "1000-01-01"
+	}
+
+	// set default value for activity level if 0
+	if myUser.ActivityLevel == 0 {
+		myUser.ActivityLevel = 1
+	}
+}

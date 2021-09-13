@@ -2,6 +2,9 @@ package database
 
 import (
 	"GoIndustryProject/models"
+	"context"
+	"database/sql"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -9,20 +12,21 @@ import (
 // Operations for users database: Insert(Create), Select(Read), Update, Delete
 
 // Insert a new user entry into database
-func InsertUser(myUser models.User) error {
+func InsertUser(db *sql.DB, myUser models.User) (err error) {
 
-	// set default value for birthday if blank
-	if myUser.Birthday == "" {
-		myUser.Birthday = "1000-01-01"
+	myUser.FillDefaults()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "INSERT INTO users (Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, PostalCode, Lat, Lng) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	stmt, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		return
 	}
+	defer stmt.Close()
 
-	// set default value for activity level if 0
-	if myUser.ActivityLevel == 0 {
-		myUser.ActivityLevel = 1
-	}
-
-	statement := "INSERT INTO users (Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, PostalCode, Lat, Lng) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
-	_, err := DB.Exec(statement,
+	_, err = stmt.ExecContext(ctx,
 		myUser.Username,
 		myUser.Password,
 		myUser.First,
@@ -40,18 +44,17 @@ func InsertUser(myUser models.User) error {
 		myUser.Lat,
 		myUser.Lng,
 	)
-	if err != nil {
-		return err
-	}
-	return nil
+	return
 }
 
 // Select/Read a user entry from database with a username input
-func SelectUser(username string) (models.User, error) {
-	var myUser models.User
-	query := "SELECT * FROM users WHERE Username=?"
+func SelectUserByUsername(db *sql.DB, username string) (myUser models.User, err error) {
 
-	err := DB.QueryRow(query, username).Scan(
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM users WHERE Username=?"
+	err = db.QueryRowContext(ctx, query, username).Scan(
 		&myUser.Username,
 		&myUser.Password,
 		&myUser.First,
@@ -69,17 +72,26 @@ func SelectUser(username string) (models.User, error) {
 		&myUser.Lat,
 		&myUser.Lng,
 	)
-	return myUser, err
+	return
 }
 
 // Update a user entry in database
 // Does not include username and password
-func UpdateUserProfile(myUser models.User) error {
-	statement := "UPDATE users SET First=?, Last=?, Gender=?, Birthday=?, " +
+func UpdateUserProfile(db *sql.DB, myUser models.User) (err error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE users SET First=?, Last=?, Gender=?, Birthday=?, " +
 		"Height=?, Weight=?, ActivityLevel=?, CaloriesPerday=?, Halal=?, Vegan=?, Address=?, PostalCode=?,  Lat=?, Lng=? " +
 		"WHERE Username=?"
+	stmt, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
 
-	_, err := DB.Exec(statement,
+	_, err = stmt.ExecContext(ctx,
 		myUser.First,
 		myUser.Last,
 		myUser.Gender,
@@ -96,55 +108,56 @@ func UpdateUserProfile(myUser models.User) error {
 		myUser.Lng,
 		myUser.Username,
 	)
-	if err != nil {
-		return err
-	}
-	return nil
+	return
 }
 
 // Update a users password entry
-func UpdateUserPassword(username string, oldPassword string, newPassword string) error {
-	//find stored password
-	var dbPassword []byte
-	query := "SELECT Password FROM users WHERE Username=?"
-
-	err := DB.QueryRow(query, username).Scan(
-		&dbPassword,
-	)
-	if err != nil {
-		return err
-	}
+func UpdateUserPassword(db *sql.DB, username string, oldPassword string, newPassword string) (err error) {
+	//Get user info from db
+	myUser, err := SelectUserByUsername(db, username)
 
 	//compare input oldPassword with dbPassword
-	err = bcrypt.CompareHashAndPassword(dbPassword, []byte(oldPassword))
+	err = bcrypt.CompareHashAndPassword(myUser.Password, []byte(oldPassword))
 	if err != nil {
-		return err
-	} else {
-		bNewPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
-		if err != nil {
-			return err
-		}
-		statement := "UPDATE users SET Password=? WHERE Username=?"
-
-		_, err = DB.Exec(statement,
-			bNewPassword,
-			username,
-		)
-		if err != nil {
-			return err
-		}
+		return
 	}
-	return err
+
+	//encrypt new password
+	bNewPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
+	if err != nil {
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "UPDATE users SET Password=? WHERE Username=?"
+	stmt, err := db.PrepareContext(ctx, query)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx,
+		bNewPassword,
+		username,
+	)
+	return
 }
 
 // Delete a user entry in database
-func DeleteUser(username string) error {
-	_, err := DB.Exec("DELETE FROM users WHERE Username=?",
-		username)
+func DeleteUser(db *sql.DB, username string) (err error) {
+	
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "DELETE FROM users WHERE Username = ?"
+	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+	defer stmt.Close()
+
+	_, err = stmt.ExecContext(ctx, username)
+	return
 }
-
-
