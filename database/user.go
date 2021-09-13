@@ -4,9 +4,8 @@ import (
 	"GoIndustryProject/models"
 	"context"
 	"database/sql"
+	"errors"
 	"time"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 // Operations for users database: Insert(Create), Select(Read), Update, Delete
@@ -26,7 +25,7 @@ func InsertUser(db *sql.DB, myUser models.User) (err error) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx,
+	result, err := stmt.ExecContext(ctx,
 		myUser.Username,
 		myUser.Password,
 		myUser.First,
@@ -44,6 +43,18 @@ func InsertUser(db *sql.DB, myUser models.User) (err error) {
 		myUser.Lat,
 		myUser.Lng,
 	)
+	if err != nil {
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
 
@@ -76,14 +87,14 @@ func SelectUserByUsername(db *sql.DB, username string) (myUser models.User, err 
 }
 
 // Update a user entry in database
-// Does not include username and password
+// Does not update username and password
 func UpdateUserProfile(db *sql.DB, myUser models.User) (err error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := "UPDATE users SET First=?, Last=?, Gender=?, Birthday=?, " +
-		"Height=?, Weight=?, ActivityLevel=?, CaloriesPerday=?, Halal=?, Vegan=?, Address=?, PostalCode=?,  Lat=?, Lng=? " +
+		"Height=?, Weight=?, ActivityLevel=?, CaloriesPerday=?, Halal=?, Vegan=?, Address=?, PostalCode=?, Lat=?, Lng=? " +
 		"WHERE Username=?"
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
@@ -91,7 +102,7 @@ func UpdateUserProfile(db *sql.DB, myUser models.User) (err error) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx,
+	result, err := stmt.ExecContext(ctx,
 		myUser.First,
 		myUser.Last,
 		myUser.Gender,
@@ -108,26 +119,23 @@ func UpdateUserProfile(db *sql.DB, myUser models.User) (err error) {
 		myUser.Lng,
 		myUser.Username,
 	)
+	if err != nil {
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
 
 // Update a users password entry
-func UpdateUserPassword(db *sql.DB, username string, oldPassword string, newPassword string) (err error) {
-	//Get user info from db
-	myUser, err := SelectUserByUsername(db, username)
-
-	//compare input oldPassword with dbPassword
-	err = bcrypt.CompareHashAndPassword(myUser.Password, []byte(oldPassword))
-	if err != nil {
-		return
-	}
-
-	//encrypt new password
-	bNewPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
-	if err != nil {
-		return
-	}
-
+func UpdateUserPassword(db *sql.DB, username string, newPassword []byte) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -138,10 +146,22 @@ func UpdateUserPassword(db *sql.DB, username string, oldPassword string, newPass
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx,
-		bNewPassword,
+	result, err := stmt.ExecContext(ctx,
+		newPassword,
 		username,
 	)
+	if err != nil {
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
 
@@ -158,6 +178,15 @@ func DeleteUser(db *sql.DB, username string) (err error) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, username)
+	result, err := stmt.ExecContext(ctx, username)
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
