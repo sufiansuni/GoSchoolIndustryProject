@@ -78,7 +78,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				Username: username,
 			}
 
-			err = database.InsertSession(mySession) // previously: mapSessions[myCookie.Value] = username
+			err = database.InsertSession(database.DB, mySession) // previously: mapSessions[myCookie.Value] = username
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -102,7 +102,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				Last:     lastname,
 			}
 
-			err = database.InsertUser(myUser) // previouslymapUsers[username] = myUser
+			err = database.InsertUser(database.DB, myUser) // previouslymapUsers[username] = myUser
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -166,7 +166,7 @@ func login(res http.ResponseWriter, req *http.Request) {
 			Username: username,
 		}
 
-		err = database.InsertSession(mySession) // previously: mapSessions[myCookie.Value] = username
+		err = database.InsertSession(database.DB, mySession) // previously: mapSessions[myCookie.Value] = username
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -192,7 +192,7 @@ func logout(res http.ResponseWriter, req *http.Request) {
 	myCookie, _ := req.Cookie("myCookie")
 	// delete the session
 
-	err := database.DeleteSession(myCookie.Value)
+	err := database.DeleteSession(database.DB, myCookie.Value)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(res, "Internal server error", http.StatusInternalServerError)

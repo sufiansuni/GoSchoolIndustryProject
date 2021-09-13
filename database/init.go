@@ -28,7 +28,7 @@ func CreateAdminAccount() {
 		First:    "first",
 		Last:     "last",
 	}
-	err := InsertUser(myUser) //previously mapUsers["admin"] = myUser
+	err := InsertUser(DB, myUser) //previously mapUsers["admin"] = myUser
 	if err != nil {
 		fmt.Println(err)
 	} else {
