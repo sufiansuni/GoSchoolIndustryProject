@@ -90,7 +90,7 @@ func TestSelectUserbyUsername(t *testing.T) {
 
 	var myUser models.User
 	myUser.FillDefaults()
-	myUser.Username = "testuser"
+	myUser.Username = "test-user"
 
 	query := "SELECT \\* FROM users WHERE Username=\\?"
 
@@ -133,8 +133,8 @@ func TestSelectUserbyUsername(t *testing.T) {
 
 	mock.ExpectQuery(query).WithArgs(myUser.Username).WillReturnRows(rows)
 
-	user, err := SelectUserByUsername(db, myUser.Username)
-	assert.NotNil(t, user)
+	resultUser, err := SelectUserByUsername(db, myUser.Username)
+	assert.NotNil(t, resultUser)
 	assert.NoError(t, err)
 }
 
@@ -143,7 +143,7 @@ func TestSelectUserbyUsernameError(t *testing.T) {
 
 	var myUser models.User
 	myUser.FillDefaults()
-	myUser.Username = "testuser"
+	myUser.Username = "test-user"
 
 	query := "SELECT \\* FROM users WHERE Username=\\?"
 
@@ -246,7 +246,7 @@ func TestUpdateUserPassword(t *testing.T) {
 
 	var myUser models.User
 	myUser.FillDefaults()
-	myUser.Username = "testuser"
+	myUser.Username = "test-user"
 	myUser.Password = []byte{98, 99}
 
 	query := "UPDATE users SET Password=\\? WHERE Username=\\?"
@@ -265,7 +265,7 @@ func TestUpdateUserPasswordError(t *testing.T) {
 
 	var myUser models.User
 	myUser.FillDefaults()
-	myUser.Username = "testuser"
+	myUser.Username = "test-user"
 	myUser.Password = []byte{98, 99}
 
 	query2 := "UPDATE users SET Password=\\? WHERE Username=\\?"

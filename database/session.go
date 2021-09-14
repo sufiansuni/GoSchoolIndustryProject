@@ -4,6 +4,7 @@ import (
 	"GoIndustryProject/models"
 	"context"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -15,17 +16,29 @@ func InsertSession(db *sql.DB, mySession models.Session) (err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO sessions(UUID, Username) VALUES(?, ?)"
+	query := "INSERT INTO sessions (UUID, Username) VALUES (?, ?)"
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx,
+	result, err := stmt.ExecContext(ctx,
 		mySession.UUID,
 		mySession.Username,
 	)
+	if err != nil {
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
 
@@ -57,10 +70,23 @@ func UpdateSession(db *sql.DB, mySession models.Session) (err error) {
 		return
 	}
 	defer stmt.Close()
-	_, err = stmt.ExecContext(ctx,
+	
+	result, err := stmt.ExecContext(ctx,
 		mySession.Username,
 		mySession.UUID,
 	)
+	if err != nil {
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
 
@@ -77,6 +103,18 @@ func DeleteSession(db *sql.DB, uuid string) (err error) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.ExecContext(ctx, uuid)
+	result, err := stmt.ExecContext(ctx, uuid)
+	if err != nil {
+		return
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return
+	}
+
+	if rowsAffected == 0 {
+		err = errors.New("no rows updated")
+	}
 	return
 }
