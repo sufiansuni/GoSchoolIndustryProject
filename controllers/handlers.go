@@ -15,7 +15,12 @@ import (
 // Handles request of index/homepage
 func index(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
-	tpl.ExecuteTemplate(res, "index.html", myUser)
+	data := struct {
+		User models.User
+	}{
+		myUser,
+	}
+	tpl.ExecuteTemplate(res, "index.html", data)
 }
 
 // Handles request of restricted page
@@ -25,8 +30,12 @@ func restricted(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
-
-	tpl.ExecuteTemplate(res, "restricted.html", myUser)
+	data := struct {
+		User models.User
+	}{
+		myUser,
+	}
+	tpl.ExecuteTemplate(res, "restricted.html", data)
 }
 
 // Handles request of sign-up page. Also login the user on success.
@@ -45,12 +54,13 @@ func signup(res http.ResponseWriter, req *http.Request) {
 		firstname := req.FormValue("firstname")
 		lastname := req.FormValue("lastname")
 		if username != "" {
+			//check if client tried to create "admin"
+			if username == "admin" {
+				http.Error(res, "Forbidden", http.StatusForbidden)
+				return
+			}
 			// check if username exist/ taken
-			var checker string
-
-			query := "SELECT Username FROM users WHERE Username=?"
-
-			err := database.DB.QueryRow(query, username).Scan(&checker)
+			_, err := database.SelectUserByUsername(database.DB, username)
 			if err != nil {
 				if err != sql.ErrNoRows {
 					fmt.Println(err)
@@ -117,7 +127,12 @@ func signup(res http.ResponseWriter, req *http.Request) {
 		return
 
 	}
-	tpl.ExecuteTemplate(res, "signup.html", myUser)
+	data := struct {
+		User models.User
+	}{
+		myUser,
+	}
+	tpl.ExecuteTemplate(res, "signup.html", data)
 }
 
 // Handles request of login page. Login user on successful POST.
@@ -132,13 +147,7 @@ func login(res http.ResponseWriter, req *http.Request) {
 		username := req.FormValue("username")
 		password := req.FormValue("password")
 		// check if user exist with username
-		var checker models.User
-
-		query := "SELECT Username, Password FROM users WHERE Username=?"
-		err := database.DB.QueryRow(query, username).Scan(
-			&checker.Username,
-			&checker.Password,
-		)
+		checker, err := database.SelectUserByUsername(database.DB, username)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
@@ -212,7 +221,7 @@ func logout(res http.ResponseWriter, req *http.Request) {
 
 // Locates user's cookie and check against session data. Creates cookie if not present.
 // If user is found, returns the user data.
-func checkUser(res http.ResponseWriter, req *http.Request) models.User {
+func checkUser(res http.ResponseWriter, req *http.Request) (myUser models.User) {
 	// get current session cookie
 	myCookie, err := req.Cookie("myCookie")
 	if err != nil {
@@ -225,12 +234,8 @@ func checkUser(res http.ResponseWriter, req *http.Request) models.User {
 	http.SetCookie(res, myCookie)
 
 	// if the user exists already, get user
-	var checker string
-	var myUser models.User
 
-	query := "SELECT Username FROM sessions WHERE UUID=?"
-	err = database.DB.QueryRow(query, myCookie.Value).Scan(&checker)
-
+	mySession, err := database.SelectSession(database.DB, myCookie.Value)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			fmt.Println(err)
@@ -239,32 +244,13 @@ func checkUser(res http.ResponseWriter, req *http.Request) models.User {
 			fmt.Println("No Entry Found in Database for UUID:" + myCookie.Value)
 		}
 	} else {
-		query = "SELECT * FROM users WHERE Username=?"
-
-		err = database.DB.QueryRow(query, checker).Scan(
-			&myUser.Username,
-			&myUser.Password,
-			&myUser.First,
-			&myUser.Last,
-			&myUser.Gender,
-			&myUser.Birthday,
-			&myUser.Height,
-			&myUser.Weight,
-			&myUser.ActivityLevel,
-			&myUser.CaloriesPerDay,
-			&myUser.Halal,
-			&myUser.Vegan,
-			&myUser.Address,
-			&myUser.PostalCode,
-			&myUser.Lat,
-			&myUser.Lng,
-		)
+		myUser, err = database.SelectUserByUsername(database.DB, mySession.Username)
 		if err != nil {
 			if err != sql.ErrNoRows {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
 			} else {
-				fmt.Println("No Entry Found in Database for User:" + checker)
+				fmt.Println("No Entry Found in Database for User:" + mySession.Username)
 			}
 		}
 	}
@@ -279,11 +265,8 @@ func alreadyLoggedIn(req *http.Request) bool {
 	if err != nil {
 		return false
 	}
-	var checker string
 
-	query := "SELECT Username FROM sessions WHERE UUID=?"
-
-	err = database.DB.QueryRow(query, myCookie.Value).Scan(&checker)
+	mySession, err := database.SelectSession(database.DB, myCookie.Value)
 	if err != nil {
 		if err != sql.ErrNoRows {
 			fmt.Print(err)
@@ -291,9 +274,7 @@ func alreadyLoggedIn(req *http.Request) bool {
 			fmt.Println("No Entry Found in Database for UUID:" + myCookie.Value)
 		}
 	} else {
-		query = "SELECT Username FROM users WHERE Username=?"
-
-		err = database.DB.QueryRow(query, checker).Scan(&checker)
+		_, err = database.SelectUserByUsername(database.DB, mySession.Username)
 		if err != nil {
 			fmt.Print(err)
 		} else {
@@ -304,6 +285,11 @@ func alreadyLoggedIn(req *http.Request) bool {
 }
 
 func testmap(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
 
 	search1, err := apis.OneMapSearch("13 Marsiling Lane")
 	if err != nil {
@@ -321,5 +307,32 @@ func testmap(res http.ResponseWriter, req *http.Request) {
 	end_lng := search2.Results[0].Longitude
 
 	MapPNG := apis.OneMapGenerateMapPNG(start_lat, start_lng, end_lat, end_lng)
-	tpl.ExecuteTemplate(res, "testmap.html", MapPNG)
+	data := struct{
+		User	models.User
+		MapPNG string
+	}{
+		myUser,
+		MapPNG,
+	}
+	tpl.ExecuteTemplate(res, "testmap.html", data)
+}
+
+func admin(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	data := struct {
+		User models.User
+	}{
+		myUser,
+	}
+	tpl.ExecuteTemplate(res, "admin.html", data)
 }

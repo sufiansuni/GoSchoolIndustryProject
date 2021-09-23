@@ -1,23 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>WELCOME PAGE</title>
-</head>
-<body>
-<h1>Welcome to the login and logout demonstration page</h1>
-{{if .First}}
-Welcome User {{.Username}}<br>
-Your first name is {{.First}}<br>
-Your last name is {{.Last}}<br>
-<h2><a href="/restricted">Restricted Area</a></h2>
-<h2><a href="/logout">Log Out</a></h2>
-{{else}}
-<h2>You are currently either not logged in or need to sign up for an account</h2>
-<h2><a href="/signup">Sign Up</a></h2>
-<h2><a href="/login">Log in</a></h2>
-{{end}}
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>WELCOME PAGE</title>
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
 
+		{{if .User.Username}}
+		<!-- Display User info if user data has username -->
+		Welcome User {{.User.Username}}<br />
+		Your first name is {{.User.First}}<br />
+		Your last name is {{.User.Last}}<br />
+		<h2><a href="/restricted">Restricted Area</a></h2>
+		<h2><a href="/logout">Log Out</a></h2>
+		{{else}}
+		<!-- Display the following if no username -->
+		<h2>
+			You are currently either not logged in or need to sign up for an account
+		</h2>
+		<h2><a href="/signup">Sign Up</a></h2>
+		<h2><a href="/login">Log in</a></h2>
+		{{end}}
+		<!-- End of Display -->
 
-</body>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
 </html>

@@ -1,19 +1,31 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>User Detailed Information</title>
-</head>
-<body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>User Detailed Information</title>
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
 
-<h1>User Detailed Information</h1>
-{{if .First}}
-Your username is {{.Username}}<br>
-Your password is {{.Password}}<br>
-Your first name is {{.First}}<br>
-Your last name is {{.Last}}<br>
-<h2><a href="/logout">Log Out</a></h2>
-{{end}}
+		<h1>User Detailed Information</h1>
 
-</body>
+		{{if .User.Username}}
+		<!-- Display User info if User data has username -->
+		Your username is {{.User.Username}}<br />
+		Your password is {{.User.Password}}<br />
+		Your first name is {{.User.First}}<br />
+		Your last name is {{.User.Last}}<br />
+		<h2><a href="/logout">Log Out</a></h2>
+		{{end}}
+		<!-- End of Display Info -->
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
 </html>
