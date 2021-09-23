@@ -14,6 +14,7 @@ import (
 func InsertUser(db *sql.DB, myUser models.User) (err error) {
 
 	myUser.FillDefaults()
+	myUser.TitleCaseNames()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

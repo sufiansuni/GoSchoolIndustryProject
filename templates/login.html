@@ -1,18 +1,27 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>LOGIN</title>
-</head>
-<body>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>LOGIN</title>
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
 
-<h1>Please login to your account</h1>
-<form method="post">
-    <input type="text" name="username" placeholder="username"><br>
-    <input type="password" name="password" placeholder="password"><br>
-    <input type="submit">
-</form>
-<h2>Or <a href="/signup">Sign Up</a> if you do not have an account</h2>
+		<h1>Please login to your account</h1>
+		<form method="post">
+			<input type="text" name="username" placeholder="username" /><br />
+			<input type="password" name="password" placeholder="password" /><br />
+			<input type="submit" />
+		</form>
+		<h2>Or <a href="/signup">Sign Up</a> if you do not have an account</h2>
 
-</body>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
 </html>

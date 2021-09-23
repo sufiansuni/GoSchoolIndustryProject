@@ -29,6 +29,7 @@ func StartHTTPServer() {
 	r.HandleFunc("/logout", logout)
 	r.Handle("/favicon.ico", http.NotFoundHandler())
 	r.HandleFunc("/testmap", testmap)
+	r.HandleFunc("/admin", admin)
 
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

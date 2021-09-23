@@ -1,5 +1,7 @@
 package models
 
+import "strings"
+
 type User struct {
 	Username       string //primary key
 	Password       []byte
@@ -29,4 +31,11 @@ func (myUser *User) FillDefaults() {
 	if myUser.ActivityLevel == 0 {
 		myUser.ActivityLevel = 1
 	}
+}
+
+func (myUser *User) TitleCaseNames() {
+	//titlecase first name
+	myUser.First = strings.Title(myUser.First)
+	//titlecase first name
+	myUser.Last = strings.Title(myUser.Last)
 }

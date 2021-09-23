@@ -25,8 +25,8 @@ func CreateAdminAccount() {
 	myUser := models.User{
 		Username: "admin",
 		Password: bPassword,
-		First:    "first",
-		Last:     "last",
+		First:    "Administrator",
+		Last:     "Developer",
 	}
 	err := InsertUser(DB, myUser) //previously mapUsers["admin"] = myUser
 	if err != nil {
