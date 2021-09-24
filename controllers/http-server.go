@@ -31,5 +31,8 @@ func StartHTTPServer() {
 	r.HandleFunc("/testmap", testmap)
 	r.HandleFunc("/admin", admin)
 
+	// Sample Handle Func
+	r.HandleFunc("/sample", sample)
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Title -->
+		<title>SAMPLE PAGE</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+        
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+        <!-- Content -->
+		<h1>Sample Page</h1>
+
+		<br>
+		<br>
+
+		<h3>Data Example 1 - Struct</h3>
+		<!-- Data Example 1 -->
+		{{if .User.Username}}
+		Username: {{.User.Username}}
+		First Name: {{.User.First}}
+		Last Name: {{.User.Last}}
+		{{end}}
+
+		<br>
+		<h3>Data Example 2 - Single Variable</h3>
+		<!-- Data Example 2 -->
+		{{if .SampleData}}
+		Sample Data: {{.SampleData}}
+		{{end}}
+
+		<br>
+		<br>
+		<h3>Data Example 3 - Array</h3>
+		<!-- Data Example 3 -->
+		{{if .SampleArray}}
+			{{range .SampleArray}}
+				Item: {{.}}
+				<br>
+			{{end}}
+		{{end}}
+		
+		<br>
+		<h3>Data Example 4 - Map</h3>
+		{{if .SampleMap}}
+			{{range $key, $value := .SampleMap}}
+				{{$key}} : {{$value}}
+				<br>
+			{{end}}
+		{{end}}
+		
+        <!-- End of Content -->
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>
