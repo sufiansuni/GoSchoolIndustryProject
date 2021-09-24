@@ -12,6 +12,38 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// Sample of handler
+func sample(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	// Do whatever you need to here, these lines are just examples
+	var myArray []string
+	myArray = append(myArray, "string1", "string2")
+
+	myMap := make(map[string]int)
+	myMap["Age"] = 100
+	myMap["Birth Year"] = 1911
+
+	// Prepare data to be sent to template
+	// Sample Data can be of any type. Use Arrays or Maps for 'group' data.
+	data := struct {
+		User models.User
+		SampleData string
+		SampleArray []string
+		SampleMap map[string]int
+	}{
+		myUser,
+		"A Sample Data",
+		myArray,
+		myMap,
+	}
+	tpl.ExecuteTemplate(res, "sample.html", data)
+}
+
 // Handles request of index/homepage
 func index(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
