@@ -14,12 +14,12 @@ import (
 func InsertUser(db *sql.DB, myUser models.User) (err error) {
 
 	myUser.FillDefaults()
-	myUser.TitleCaseNames()
+	myUser.AdjustStrings()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	query := "INSERT INTO users (Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, PostalCode, Lat, Lng) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+	query := "INSERT INTO users (Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, Unit, Lat, Lng) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
 		return
@@ -40,7 +40,7 @@ func InsertUser(db *sql.DB, myUser models.User) (err error) {
 		myUser.Halal,
 		myUser.Vegan,
 		myUser.Address,
-		myUser.PostalCode,
+		myUser.Unit,
 		myUser.Lat,
 		myUser.Lng,
 	)
@@ -80,7 +80,7 @@ func SelectUserByUsername(db *sql.DB, username string) (myUser models.User, err 
 		&myUser.Halal,
 		&myUser.Vegan,
 		&myUser.Address,
-		&myUser.PostalCode,
+		&myUser.Unit,
 		&myUser.Lat,
 		&myUser.Lng,
 	)
@@ -91,11 +91,14 @@ func SelectUserByUsername(db *sql.DB, username string) (myUser models.User, err 
 // Does not update username and password
 func UpdateUserProfile(db *sql.DB, myUser models.User) (err error) {
 
+	myUser.FillDefaults()
+	myUser.AdjustStrings()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	query := "UPDATE users SET First=?, Last=?, Gender=?, Birthday=?, " +
-		"Height=?, Weight=?, ActivityLevel=?, CaloriesPerday=?, Halal=?, Vegan=?, Address=?, PostalCode=?, Lat=?, Lng=? " +
+		"Height=?, Weight=?, ActivityLevel=?, CaloriesPerday=?, Halal=?, Vegan=?, Address=?, Unit=?, Lat=?, Lng=? " +
 		"WHERE Username=?"
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
@@ -115,7 +118,7 @@ func UpdateUserProfile(db *sql.DB, myUser models.User) (err error) {
 		myUser.Halal,
 		myUser.Vegan,
 		myUser.Address,
-		myUser.PostalCode,
+		myUser.Unit,
 		myUser.Lat,
 		myUser.Lng,
 		myUser.Username,

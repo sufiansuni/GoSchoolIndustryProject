@@ -1,4 +1,4 @@
-package apis
+package api
 
 import (
 	"bytes"
@@ -79,7 +79,7 @@ func OneMapSearch(search_val string) (OneMapSearchResult, error) {
 
 // Function sends POST request to OneMap GetToken API and returns the unmarshaled json response.
 // Requires email and password in .env file
-func OneMap_GetToken() (OneMapGetTokenResult, error) {
+func OneMapGetToken() (OneMapGetTokenResult, error) {
 
 	var result OneMapGetTokenResult
 
@@ -109,11 +109,11 @@ func OneMap_GetToken() (OneMapGetTokenResult, error) {
 	}
 }
 
-// Function makes use of API_TomTom_Routing and processes function inputs.
+// Function makes use of TomTomRouting() to processes co-ords and return an image link (OneMap)
 // Returns a suitable request string to OneMAP Static Map API.
 // Note that the result the above request is of PNG format.
 // Pass it to a html template. Eg: <img src = {{.}} alt="Map">
-func OneMapGenerateMapPNG(start_lat string, start_lng string, end_lat string, end_lng string) string {
+func OneMapGenerateMapPNGTwoPoints(start_lat string, start_lng string, end_lat string, end_lng string) string {
 
 	route, err := TomTomRouting(start_lat, start_lng, end_lat, end_lng)
 	if err != nil {
@@ -185,4 +185,21 @@ func find_mid(start_lat string, start_lng string, end_lat string, end_lng string
 
 	return mid_lat, mid_lng, err
 
+}
+
+// Function processes co-ords and return an image link (OneMap)
+func OneMapGenerateMapPNGSingle(lat string, lng string) string {
+	points := "[" + lat + "," + lng + ",%22" + "175,50,0" + "%22,%22" + "A" + "%22]" //R,G,B,Label
+
+	MapPNG := "https://developers.onemap.sg/commonapi/staticmap/getStaticImage?layerchosen=default&" +
+		"&lat=" + lat +
+		"&lng=" + lng +
+		"&zoom=17" +
+		"&height=512" +
+		"&width=400" +
+		"&points=" + points +
+		"&color=" +
+		"&fillColor="
+
+	return MapPNG
 }

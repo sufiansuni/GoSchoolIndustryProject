@@ -1,12 +1,14 @@
 package controllers
 
 import (
-	"GoIndustryProject/apis"
+	"GoIndustryProject/api"
 	"GoIndustryProject/database"
 	"GoIndustryProject/models"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +17,7 @@ import (
 // Sample of handler
 func sample(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
-	if alreadyLoggedIn(req) {
+	if !alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
@@ -31,10 +33,10 @@ func sample(res http.ResponseWriter, req *http.Request) {
 	// Prepare data to be sent to template
 	// Sample Data can be of any type. Use Arrays or Maps for 'group' data.
 	data := struct {
-		User models.User
-		SampleData string
+		User        models.User
+		SampleData  string
 		SampleArray []string
-		SampleMap map[string]int
+		SampleMap   map[string]int
 	}{
 		myUser,
 		"A Sample Data",
@@ -56,6 +58,7 @@ func index(res http.ResponseWriter, req *http.Request) {
 }
 
 // Handles request of restricted page
+// This is a test page. Delete before final deploy.
 func restricted(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
 	if !alreadyLoggedIn(req) {
@@ -316,6 +319,8 @@ func alreadyLoggedIn(req *http.Request) bool {
 	return false
 }
 
+// Handles request of testmap page
+// This is a test page. Delete before final deploy.
 func testmap(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
 	if !alreadyLoggedIn(req) {
@@ -323,11 +328,11 @@ func testmap(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	search1, err := apis.OneMapSearch("13 Marsiling Lane")
+	search1, err := api.OneMapSearch("13 Marsiling Lane")
 	if err != nil {
 		fmt.Println(err)
 	}
-	search2, err := apis.OneMapSearch("Woodlands MRT NS9")
+	search2, err := api.OneMapSearch("Woodlands MRT NS9")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -338,9 +343,9 @@ func testmap(res http.ResponseWriter, req *http.Request) {
 	end_lat := search2.Results[0].Latitude
 	end_lng := search2.Results[0].Longitude
 
-	MapPNG := apis.OneMapGenerateMapPNG(start_lat, start_lng, end_lat, end_lng)
-	data := struct{
-		User	models.User
+	MapPNG := api.OneMapGenerateMapPNGTwoPoints(start_lat, start_lng, end_lat, end_lng)
+	data := struct {
+		User   models.User
 		MapPNG string
 	}{
 		myUser,
@@ -349,6 +354,7 @@ func testmap(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "testmap.html", data)
 }
 
+// Handles request of admin page
 func admin(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
 	if !alreadyLoggedIn(req) {
@@ -367,4 +373,127 @@ func admin(res http.ResponseWriter, req *http.Request) {
 		myUser,
 	}
 	tpl.ExecuteTemplate(res, "admin.html", data)
+}
+
+// Handles request of setlocation page
+func setlocation(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	// Do whatever you need to here
+
+	var searchResults api.OneMapSearchResult
+
+	if req.Method == http.MethodPost {
+		locationQuery := req.FormValue("locationQuery")
+		var err error
+		searchResults, err = api.OneMapSearch(locationQuery)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	var newResults []map[string]string
+
+	for _, v := range searchResults.Results {
+		var newResultItem map[string]string
+		jV, err := json.Marshal(v)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		err = json.Unmarshal(jV, &newResultItem)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		var mapLinkStruct struct {
+			MapLink string
+		}
+		mapLinkStruct.MapLink = api.OneMapGenerateMapPNGSingle(v.Latitude, v.Longitude)
+
+		jMapLinkStruct, err := json.Marshal(mapLinkStruct)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		err = json.Unmarshal(jMapLinkStruct, &newResultItem)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		newResults = append(newResults, newResultItem)
+
+	}
+
+	// Prepare data to be sent to template
+	data := struct {
+		User      models.User
+		Locations []map[string]string
+	}{
+		myUser,
+		newResults,
+	}
+	tpl.ExecuteTemplate(res, "setlocation.html", data)
+}
+
+// Handles request of confirmlocation page
+func confirmlocation(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		currentLocation := req.FormValue("currentLocation")
+		searchResult, err := api.OneMapSearch(currentLocation)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		myUser.Address = searchResult.Results[0].Address
+
+		myUser.Unit = req.FormValue("unit")
+
+		if searchResult.Results[0].Latitude != "NIL" {
+			myUser.Lat, err = strconv.ParseFloat(searchResult.Results[0].Latitude, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if searchResult.Results[0].Longitude != "NIL" {
+			myUser.Lng, err = strconv.ParseFloat(searchResult.Results[0].Longitude, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		err = database.UpdateUserProfile(database.DB, myUser)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+	}
+	http.Redirect(res, req, "/", http.StatusSeeOther)
 }

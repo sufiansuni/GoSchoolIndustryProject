@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>Set Location</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<!-- Content -->
+		<div class="px-3">
+		{{if .Locations}}
+			<h2>Select Your Location</h2>
+			<form action="/confirmlocation" method="POST">
+				{{range $index, $value := .Locations}}
+				<input type="radio" id="LocationResult{{$index}}" name="currentLocation" value="{{index $value "ADDRESS"}}" required/>
+				<label for="LocationResult{{$index}}">
+					{{index $value "ADDRESS"}}
+					<a href= "{{index $value "MapLink"}}" target="_blank">Open Map</a> 
+				</label>
+				<br />
+				{{end}}
+				<label for="unit"><b>Unit</b>:</label>
+				<input type="text" name="unit" placeholder="Floor-Unit, Specific Name or Nil" size=30 required/>
+				<br>
+				<button
+					type="submit"
+					class="btn btn-light my-2"
+					style="background-color: #d70f64; color: white;"
+				>Confirm Location
+				</button>
+			</form>
+
+		{{else}}
+			<h2>No Results Found</h2>
+			Enter Street Name or Postal Code
+			<form action="/setlocation" method="post">
+				<div class="form-group w-50">
+					<input
+						type="text"
+						class="form-control"
+						name="locationQuery"
+					/>
+				</div>
+				<button
+					type="submit"
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+				>
+					Set Location
+				</button>
+			</form>
+		{{end}}
+		</div>
+
+		<!-- End of Content -->
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>
