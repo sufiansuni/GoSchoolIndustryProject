@@ -30,6 +30,8 @@ func StartHTTPServer() {
 	r.Handle("/favicon.ico", http.NotFoundHandler())
 	r.HandleFunc("/testmap", testmap)
 	r.HandleFunc("/admin", admin)
+	r.HandleFunc("/setlocation", setlocation)
+	r.HandleFunc("/confirmlocation", confirmlocation)
 
 	// Sample Handle Func
 	r.HandleFunc("/sample", sample)

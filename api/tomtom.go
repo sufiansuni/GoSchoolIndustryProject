@@ -1,4 +1,4 @@
-package apis
+package api
 
 // TomTom: https://www.tomtom.com/
 // TomTom (Developers): https://developer.tomtom.com/

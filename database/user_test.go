@@ -25,7 +25,7 @@ func TestInsertUser(t *testing.T) {
 	var myUser models.User
 	myUser.FillDefaults()
 
-	query := "INSERT INTO users \\(Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, PostalCode, Lat, Lng\\)" +
+	query := "INSERT INTO users \\(Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, Unit, Lat, Lng\\)" +
 		" VALUES \\(\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?\\)"
 
 	prep := mock.ExpectPrepare(query)
@@ -43,7 +43,7 @@ func TestInsertUser(t *testing.T) {
 		myUser.Halal,
 		myUser.Vegan,
 		myUser.Address,
-		myUser.PostalCode,
+		myUser.Unit,
 		myUser.Lat,
 		myUser.Lng,
 	).WillReturnResult(sqlmock.NewResult(0, 1))
@@ -58,7 +58,7 @@ func TestInserUserError(t *testing.T) {
 	var myUser models.User
 	myUser.FillDefaults()
 
-	query := "INSERT INTO users \\(Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, PostalCode, Lat, Lng\\)" +
+	query := "INSERT INTO users \\(Username, Password, First, Last, Gender, Birthday, Height, Weight, ActivityLevel, CaloriesPerDay, Halal, Vegan, Address, Unit, Lat, Lng\\)" +
 		" VALUES \\(\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?,\\?\\)"
 
 	prep := mock.ExpectPrepare(query)
@@ -76,7 +76,7 @@ func TestInserUserError(t *testing.T) {
 		myUser.Halal,
 		myUser.Vegan,
 		myUser.Address,
-		myUser.PostalCode,
+		myUser.Unit,
 		myUser.Lat,
 		myUser.Lng,
 	).WillReturnResult(sqlmock.NewResult(0, 0))
@@ -108,7 +108,7 @@ func TestSelectUserbyUsername(t *testing.T) {
 		"Halal",
 		"Vegan",
 		"Address",
-		"PostalCode",
+		"Unit",
 		"Lat",
 		"Lng",
 	}).
@@ -126,7 +126,7 @@ func TestSelectUserbyUsername(t *testing.T) {
 			myUser.Halal,
 			myUser.Vegan,
 			myUser.Address,
-			myUser.PostalCode,
+			myUser.Unit,
 			myUser.Lat,
 			myUser.Lng,
 		)
@@ -181,7 +181,7 @@ func TestUpdateUserProfile(t *testing.T) {
 
 	query := "UPDATE users SET First=\\?, Last=\\?, Gender=\\?, Birthday=\\?, " +
 		"Height=\\?, Weight=\\?, ActivityLevel=\\?, CaloriesPerday=\\?, Halal=\\?, Vegan=\\?, " +
-		"Address=\\?, PostalCode=\\?,  Lat=\\?, Lng=\\? " +
+		"Address=\\?, Unit=\\?,  Lat=\\?, Lng=\\? " +
 		"WHERE Username=\\?"
 
 	prep := mock.ExpectPrepare(query)
@@ -197,7 +197,7 @@ func TestUpdateUserProfile(t *testing.T) {
 		myUser.Halal,
 		myUser.Vegan,
 		myUser.Address,
-		myUser.PostalCode,
+		myUser.Unit,
 		myUser.Lat,
 		myUser.Lng,
 		myUser.Username,
@@ -231,7 +231,7 @@ func TestUpdateUserProfileError(t *testing.T) {
 		myUser.Halal,
 		myUser.Vegan,
 		myUser.Address,
-		myUser.PostalCode,
+		myUser.Unit,
 		myUser.Lat,
 		myUser.Lng,
 		myUser.Username,

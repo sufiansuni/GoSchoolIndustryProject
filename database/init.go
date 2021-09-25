@@ -46,7 +46,7 @@ func CreateUserTable() {
 		"First VARCHAR(255), " +
 		"Last VARCHAR(255), " +
 		"Gender VARCHAR(6), " +
-		"Birthday DATE, " +
+		"Birthday VARCHAR(255), " +
 		"Height SMALLINT UNSIGNED, " +
 		"Weight SMALLINT UNSIGNED, " +
 		"ActivityLevel SMALLINT UNSIGNED, " +
@@ -54,7 +54,7 @@ func CreateUserTable() {
 		"Halal BOOL, " +
 		"Vegan BOOL, " +
 		"Address VARCHAR(255), " +
-		"PostalCode MEDIUMINT UNSIGNED, " +
+		"Unit VARCHAR(255), " +
 		"Lat FLOAT, " +
 		"Lng FLOAT" +
 		")")

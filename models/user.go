@@ -16,7 +16,7 @@ type User struct {
 	Halal          bool
 	Vegan          bool
 	Address        string
-	PostalCode     int
+	Unit           string
 	Lat            float64
 	Lng            float64
 }
@@ -33,9 +33,15 @@ func (myUser *User) FillDefaults() {
 	}
 }
 
-func (myUser *User) TitleCaseNames() {
+func (myUser *User) AdjustStrings() {
 	//titlecase first name
+	myUser.First = strings.ToLower(myUser.First)
 	myUser.First = strings.Title(myUser.First)
-	//titlecase first name
+	//titlecase last name
+	myUser.Last = strings.ToLower(myUser.Last)
 	myUser.Last = strings.Title(myUser.Last)
+	//titlecase address
+	myUser.Address = strings.ToUpper(myUser.Address)
+	//titlecase unit
+	myUser.Unit = strings.ToUpper(myUser.Unit)
 }
