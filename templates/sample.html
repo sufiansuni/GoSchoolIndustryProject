@@ -21,14 +21,13 @@
 		<h1>Sample Page</h1>
 
 		<br>
-		<br>
 
 		<h3>Data Example 1 - Struct</h3>
 		<!-- Data Example 1 -->
 		{{if .User.Username}}
-		Username: {{.User.Username}}
-		First Name: {{.User.First}}
-		Last Name: {{.User.Last}}
+		Username: {{.User.Username}}<br>
+		First Name: {{.User.First}}<br>
+		Last Name: {{.User.Last}}<br>
 		{{end}}
 
 		<br>
@@ -53,9 +52,16 @@
 		<h3>Data Example 4 - Map</h3>
 		{{if .SampleMap}}
 			{{range $key, $value := .SampleMap}}
-				{{$key}} : {{$value}}
+				{{$key}}: {{$value}}
 				<br>
 			{{end}}
+		{{end}}
+
+		<br>
+		<h3>Data Example 5 - Map (Version 2)</h3>
+		{{if .SampleMap}}
+			Age: {{index .SampleMap "Age"}}<br>
+			Birth Year: {{index .SampleMap "Birth Year"}}<br>
 		{{end}}
 		
         <!-- End of Content -->

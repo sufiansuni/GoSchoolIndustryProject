@@ -617,3 +617,51 @@ func profile(res http.ResponseWriter, req *http.Request) {
 		tpl.ExecuteTemplate(res, "profile.html", data)
 	}
 }
+
+// Handles request of changepassword page
+func changepassword(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		currentPassword := req.FormValue("currentPassword")
+		newPassword := req.FormValue("newPassword")
+
+		// Matching of current password entered
+		err := bcrypt.CompareHashAndPassword(myUser.Password, []byte(currentPassword))
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Username and/or password do not match", http.StatusUnauthorized)
+			return
+		}
+
+		bNewPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.MinCost)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		err = database.UpdateUserPassword(database.DB,myUser.Username,bNewPassword)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(res, req, "/changepassword", http.StatusSeeOther)
+	}
+
+	if req.Method == http.MethodGet {
+		// Prepare data to be sent to template
+		data := struct {
+			User models.User
+		}{
+			myUser,
+		}
+		tpl.ExecuteTemplate(res, "changepassword.html", data)
+	}
+}
