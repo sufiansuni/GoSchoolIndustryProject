@@ -48,7 +48,7 @@ func CreateUserTable() {
 		"Gender VARCHAR(6), " +
 		"Birthday VARCHAR(255), " +
 		"Height SMALLINT UNSIGNED, " +
-		"Weight SMALLINT UNSIGNED, " +
+		"Weight FLOAT UNSIGNED, " +
 		"ActivityLevel SMALLINT UNSIGNED, " +
 		"CaloriesPerDay FLOAT UNSIGNED, " +
 		"Halal BOOL, " +

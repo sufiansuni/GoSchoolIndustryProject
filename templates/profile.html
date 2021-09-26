@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>PROFILE PAGE</title>
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Profile</h2>
+			<form method="post">
+				<label for="firstName">First Name:</label>
+				<input type="text" name="firstName" placeholder="{{.User.First}}"/>
+				<br />
+				<label for="lastLame">Last Name:</label>
+				<input type="text" name="lastName" placeholder="{{.User.Last}}"/>
+				<br />
+
+				<label for="gender">Gender:</label>
+				<select name="gender">
+					<option hidden disabled selected value>Select One</option>
+					<option value="Male" {{if eq .User.Gender "Male"}} selected {{end}}>Male</option>
+					<option value="Female" {{if eq .User.Gender "Female"}} selected {{end}}>Female</option>
+				</select>
+				<br />
+
+                <label for="birthday">Birthday:</label>
+                <input type="date" name="birthday" value="{{.User.Birthday}}">
+                <br />
+
+				<br />
+                <h4>Health Section</h4>
+                <label for="height">Height(cm):</label>
+                <input type="number" name="height" placeholder="{{.User.Height}}">
+				<br />
+
+                <label for="weight">Weight(kg):</label>
+                <input type="number" name="weight" placeholder="{{.User.Weight}}" step="0.01">
+				<br />
+
+                <label for="activityLevel">Activity Level(between 1 and 5):</label>
+                <input type="number" name="activityLevel" placeholder="{{.User.ActivityLevel}}" min="1" max="5">
+				<br />
+
+                <label for="caloriesPerDay">Target Calories Per Day:</label>
+                <input type="number" name="caloriesPerDay" placeholder="{{.User.CaloriesPerDay}}">
+				<br />
+
+				<br />
+                <h4>Preferences</h4>
+                <input type="checkbox" name="halal" value="true" {{if eq .User.Halal true}} checked {{end}}>
+                <label for="halal"> Halal</label>
+                <br>
+
+                <input type="checkbox" name="vegan" value="true" {{if eq .User.Vegan true}} checked {{end}}>
+                <label for="vegan"> Vegetarian</label>
+                <br>
+
+				<br />
+				<button
+					type="submit"
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+				>
+                    Update Profile
+				</button>
+			</form>
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

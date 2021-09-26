@@ -32,6 +32,7 @@ func StartHTTPServer() {
 	r.HandleFunc("/admin", admin)
 	r.HandleFunc("/setlocation", setlocation)
 	r.HandleFunc("/confirmlocation", confirmlocation)
+	r.HandleFunc("/profile", profile)
 
 	// Sample Handle Func
 	r.HandleFunc("/sample", sample)
