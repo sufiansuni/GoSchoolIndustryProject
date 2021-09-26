@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strconv"
 
 	uuid "github.com/satori/go.uuid"
@@ -496,4 +497,123 @@ func confirmlocation(res http.ResponseWriter, req *http.Request) {
 
 	}
 	http.Redirect(res, req, "/", http.StatusSeeOther)
+}
+
+// Handles request of profile page
+func profile(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		unchangedUser := myUser
+
+		if req.FormValue("firstName") != "" {
+			myUser.First = req.FormValue("firstName")
+		}
+
+		if req.FormValue("lastName") != "" {
+			myUser.First = req.FormValue("lastName")
+		}
+
+		if req.FormValue("gender") != "" {
+			myUser.Gender = req.FormValue("gender")
+		}
+
+		if req.FormValue("birthday") != "" {
+			myUser.Birthday = req.FormValue("birthday")
+		}
+
+		if req.FormValue("height") != "" {
+			var err error
+			myUser.Height, err = strconv.Atoi(req.FormValue("height"))
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("weight") != "" {
+			var err error
+			myUser.Weight, err = strconv.ParseFloat(req.FormValue("weight"), 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("activityLevel") != "" {
+			var err error
+			myUser.ActivityLevel, err = strconv.Atoi(req.FormValue("activityLevel"))
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("caloriesPerDay") != "" {
+			var err error
+			myUser.CaloriesPerDay, err = strconv.Atoi(req.FormValue("caloriesPerDay"))
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("halal") != "" {
+			switch req.FormValue("halal") {
+			case "true":
+				myUser.Halal = true
+			case "false":
+				myUser.Halal = false
+			default:
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			myUser.Halal = false
+		}
+
+		if req.FormValue("vegan") != "" {
+			switch req.FormValue("vegan") {
+			case "true":
+				myUser.Vegan = true
+			case "false":
+				myUser.Vegan = false
+			default:
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			myUser.Vegan = false
+		}
+
+		if !reflect.DeepEqual(myUser, unchangedUser) {
+			err := database.UpdateUserProfile(database.DB, myUser)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		http.Redirect(res, req, "/profile", http.StatusSeeOther)
+
+	}
+
+	if req.Method == http.MethodGet {
+		// Prepare data to be sent to template
+		data := struct {
+			User models.User
+		}{
+			myUser,
+		}
+		tpl.ExecuteTemplate(res, "profile.html", data)
+	}
 }

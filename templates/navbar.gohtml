@@ -46,7 +46,11 @@
 									Not Set
 								{{end}}
 							</a>
-							<div class="dropdown-menu mt-0 w-100 shadow border-outline-success px-3" aria-labelledby="dropdown01">
+							<div 
+								class="dropdown-menu w-100 shadow border-outline-success px-3"
+								style="min-width: 50vmax;"
+								aria-labelledby="dropdown01"
+							>
 							Enter Street Name or Postal Code
 							<form action="/setlocation" method="post">
 								<div class="form-group d-inline-block align-top">
@@ -54,7 +58,7 @@
 										type="text"
 										class="form-control"
 										name="locationQuery"
-										size="80"
+										size="70"
 									>
 								</div>
 								<button
@@ -63,6 +67,7 @@
 									style="background-color: #d70f64; color: white;"
 								>Set Location
 								</button>
+								
 							</form>
 							</div>
 						</li>
@@ -96,7 +101,7 @@
 									{{end}}
 
 									<a class="dropdown-item" href="#">My Orders</a>
-									<a class="dropdown-item" href="#">Profile</a>
+									<a class="dropdown-item" href="/profile">Profile</a>
 									<div class="dropdown-divider"></div>
 									<a class="dropdown-item" href="/logout">Logout</a>
 								</div>
