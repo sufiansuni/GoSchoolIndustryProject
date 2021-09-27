@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 		<!-- Title -->
-		<title>Set Location</title>
+		<title>ADMIN - USER LOCATION - SET</title>
 
 		<!-- Bootstrap -->
 		{{template "bootstrap"}}
@@ -20,7 +20,7 @@
 		<div class="px-3">
 		{{if .Locations}}
 			<h2>Select Your Location</h2>
-			<form action="/confirmlocation" method="POST">
+			<form action="/admin/users/{{.Target.Username}}/location/confirm" method="POST">
 				{{range $index, $value := .Locations}}
 				<input type="radio" id="LocationResult{{$index}}" name="currentLocation" value="{{index $value "ADDRESS"}}" required/>
 				<label for="LocationResult{{$index}}">
@@ -43,7 +43,7 @@
 		{{else}}
 			<h2>No Results Found</h2>
 			Enter Street Name or Postal Code
-			<form action="/setlocation" method="post">
+			<form method="post">
 				<div class="form-group w-50">
 					<input
 						type="text"

@@ -4,7 +4,10 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
 		<title>ADMIN PAGE</title>
+		
 		<!-- Bootstrap -->
 		{{template "bootstrap"}}
 	</head>
@@ -12,9 +15,16 @@
 		<!-- Navbar -->
 		{{template "navbar" .}}
 		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>Admin Page</h2>
 
-		<h1>Admin Page</h1>
+			<a href="/admin/users">Manage Users</a>
+			<br />
 
+			<a href="#">Manage Restaurants</a>
+			<br />
+
+		</div>
 		<!-- Bootstrap Javascript -->
 		{{template "bootstrap-javascript"}}
 	</body>

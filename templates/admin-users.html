@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - MANAGE USERS</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>Manage Users</h2>
+
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/new"
+				role="button"
+			>
+				Create New User
+			</a>
+
+			{{if .Users}}
+			<table>
+				<thead>
+					<th>Username</th>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th>Edit Profile</th>
+					<th>View Location</th>
+					<th>Manage Orders</th>
+					<th>Delete User</th>
+				</thead>
+				<tbody>
+					{{range .Users}}
+					<tr>
+						<td>{{.Username}}</td>
+						<td>{{.First}}</td>
+						<td>{{.Last}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/users/{{.Username}}/profile"
+								role="button"
+							>
+								Edit Profile
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/users/{{.Username}}/location"
+								role="button"
+							>
+								View Location
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="#"
+								role="button"
+							>
+								Manage Orders
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/users/{{.Username}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete user: {{.Username}}?')"
+							>
+								Delete User
+							</a>
+						</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{end}}
+		</div>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>
