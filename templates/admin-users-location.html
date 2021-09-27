@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Title -->
+		<title>ADMIN - USER LOCATION</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>User Location - Username: {{.Target.Username}}</h2>
+
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users"
+				role="button"
+			>
+				Back to All Users
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Target.Username}}/profile"
+				role="button"
+			>
+				Edit Profile
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="#"
+				role="button"
+			>
+				Manage Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Target.Username}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete user: {{.Target.Username}}?')"
+			>
+				Delete User
+			</a>
+
+			<br />
+			<br />
+			<b>Address</b>: 
+			{{if .Target.Address}}
+				{{.Target.Address}}
+				<a href= "{{.MapLink}}" target="_blank">View Map</a>
+			{{else}}
+				Not Set
+			{{end}}
+			<br />
+			<b>Unit</b>: 
+			{{if .Target.Unit}} 
+				{{.Target.Unit}} 
+			{{else}} 
+				Not Set 
+			{{end}}
+			<br />
+			
+			<br />
+            <h4>Set New Location</h4>
+			Enter Street Name or Postal Code
+			<form action="/admin/users/{{.Target.Username}}/location/set" method="post">
+				<div class="form-group w-50">
+					<input
+						type="text"
+						class="form-control"
+						name="locationQuery"
+					/>
+				</div>
+				<button
+					type="submit"
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+				>
+					Set Location
+				</button>
+			</form>
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

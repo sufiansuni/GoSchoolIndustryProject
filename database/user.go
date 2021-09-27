@@ -84,6 +84,7 @@ func SelectUserByUsername(db *sql.DB, username string) (myUser models.User, err 
 		&myUser.Lat,
 		&myUser.Lng,
 	)
+	
 	return
 }
 
@@ -171,7 +172,7 @@ func UpdateUserPassword(db *sql.DB, username string, newPassword []byte) (err er
 
 // Delete a user entry in database
 func DeleteUser(db *sql.DB, username string) (err error) {
-	
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -192,5 +193,46 @@ func DeleteUser(db *sql.DB, username string) (err error) {
 	if rowsAffected == 0 {
 		err = errors.New("no rows updated")
 	}
+	return
+}
+
+func SelectAllUsers(db *sql.DB) (myUsers []models.User, err error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	rows, err := db.QueryContext(ctx, "SELECT * FROM users")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var myUser models.User
+		err = rows.Scan(
+			&myUser.Username,
+			&myUser.Password,
+			&myUser.First,
+			&myUser.Last,
+			&myUser.Gender,
+			&myUser.Birthday,
+			&myUser.Height,
+			&myUser.Weight,
+			&myUser.ActivityLevel,
+			&myUser.CaloriesPerDay,
+			&myUser.Halal,
+			&myUser.Vegan,
+			&myUser.Address,
+			&myUser.Unit,
+			&myUser.Lat,
+			&myUser.Lng,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+		myUsers = append(myUsers, myUser)
+	}
+
 	return
 }

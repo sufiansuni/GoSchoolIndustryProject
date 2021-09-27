@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -82,6 +83,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 	}
 
 	var myUser models.User
+
 	// process form submission
 	if req.Method == http.MethodPost {
 		// get form values
@@ -111,28 +113,6 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			// create session
-			id := uuid.NewV4()
-			myCookie := &http.Cookie{
-				Name:  "myCookie",
-				Value: id.String(),
-			}
-			http.SetCookie(res, myCookie)
-
-			mySession := models.Session{
-				UUID:     myCookie.Value,
-				Username: username,
-			}
-
-			err = database.InsertSession(database.DB, mySession) // previously: mapSessions[myCookie.Value] = username
-			if err != nil {
-				fmt.Println(err)
-				http.Error(res, "Internal server error", http.StatusInternalServerError)
-				return
-			} else {
-				fmt.Println("Session Created")
-			}
-
 			//encrypt password
 			bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
 			if err != nil {
@@ -147,6 +127,7 @@ func signup(res http.ResponseWriter, req *http.Request) {
 				First:    firstname,
 				Last:     lastname,
 			}
+			myUser.AdjustStrings()
 
 			err = database.InsertUser(database.DB, myUser) // previouslymapUsers[username] = myUser
 			if err != nil {
@@ -156,6 +137,30 @@ func signup(res http.ResponseWriter, req *http.Request) {
 			} else {
 				fmt.Println("User Created:", username)
 			}
+
+			// create session
+			id := uuid.NewV4()
+			myCookie := &http.Cookie{
+				Name:  "myCookie",
+				Value: id.String(),
+			}
+
+			http.SetCookie(res, myCookie)
+
+			mySession := models.Session{
+				UUID:     myCookie.Value,
+				Username: myUser.Username,
+			}
+
+			err = database.InsertSession(database.DB, mySession) // previously: mapSessions[myCookie.Value] = username
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			} else {
+				fmt.Println("Session Created")
+			}
+
 		}
 
 		// redirect to main index
@@ -387,6 +392,7 @@ func setlocation(res http.ResponseWriter, req *http.Request) {
 	// Do whatever you need to here
 
 	var searchResults api.OneMapSearchResult
+	var newResults []map[string]string
 
 	if req.Method == http.MethodPost {
 		locationQuery := req.FormValue("locationQuery")
@@ -397,45 +403,43 @@ func setlocation(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-	}
 
-	var newResults []map[string]string
+		for _, v := range searchResults.Results {
+			var newResultItem map[string]string
+			jV, err := json.Marshal(v)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			err = json.Unmarshal(jV, &newResultItem)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 
-	for _, v := range searchResults.Results {
-		var newResultItem map[string]string
-		jV, err := json.Marshal(v)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
+			var mapLinkStruct struct {
+				MapLink string
+			}
+			mapLinkStruct.MapLink = api.OneMapGenerateMapPNGSingle(v.Latitude, v.Longitude)
+
+			jMapLinkStruct, err := json.Marshal(mapLinkStruct)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			err = json.Unmarshal(jMapLinkStruct, &newResultItem)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			newResults = append(newResults, newResultItem)
+
 		}
-		err = json.Unmarshal(jV, &newResultItem)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		var mapLinkStruct struct {
-			MapLink string
-		}
-		mapLinkStruct.MapLink = api.OneMapGenerateMapPNGSingle(v.Latitude, v.Longitude)
-
-		jMapLinkStruct, err := json.Marshal(mapLinkStruct)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-		err = json.Unmarshal(jMapLinkStruct, &newResultItem)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		newResults = append(newResults, newResultItem)
-
 	}
 
 	// Prepare data to be sent to template
@@ -645,7 +649,7 @@ func changepassword(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		err = database.UpdateUserPassword(database.DB,myUser.Username,bNewPassword)
+		err = database.UpdateUserPassword(database.DB, myUser.Username, bNewPassword)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -664,4 +668,483 @@ func changepassword(res http.ResponseWriter, req *http.Request) {
 		}
 		tpl.ExecuteTemplate(res, "changepassword.html", data)
 	}
+}
+
+// handles request of "/admin/users" page
+func adminUsers(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	myUsers, err := database.SelectAllUsers(database.DB)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	data := struct {
+		User  models.User
+		Users []models.User
+	}{
+		myUser,
+		myUsers,
+	}
+	tpl.ExecuteTemplate(res, "admin-users.html", data)
+}
+
+// handles request of "/admin/users/{username}/profile" page
+func adminUserProfile(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetUser, err := database.SelectUserByUsername(database.DB, vars["username"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		unchangedUser := targetUser
+
+		if req.FormValue("firstName") != "" {
+			targetUser.First = req.FormValue("firstName")
+		}
+
+		if req.FormValue("lastName") != "" {
+			targetUser.First = req.FormValue("lastName")
+		}
+
+		if req.FormValue("gender") != "" {
+			targetUser.Gender = req.FormValue("gender")
+		}
+
+		if req.FormValue("birthday") != "" {
+			targetUser.Birthday = req.FormValue("birthday")
+		}
+
+		if req.FormValue("height") != "" {
+			var err error
+			targetUser.Height, err = strconv.Atoi(req.FormValue("height"))
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("weight") != "" {
+			var err error
+			targetUser.Weight, err = strconv.ParseFloat(req.FormValue("weight"), 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("activityLevel") != "" {
+			var err error
+			targetUser.ActivityLevel, err = strconv.Atoi(req.FormValue("activityLevel"))
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("caloriesPerDay") != "" {
+			var err error
+			targetUser.CaloriesPerDay, err = strconv.Atoi(req.FormValue("caloriesPerDay"))
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if req.FormValue("halal") != "" {
+			switch req.FormValue("halal") {
+			case "true":
+				targetUser.Halal = true
+			case "false":
+				targetUser.Halal = false
+			default:
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			targetUser.Halal = false
+		}
+
+		if req.FormValue("vegan") != "" {
+			switch req.FormValue("vegan") {
+			case "true":
+				targetUser.Vegan = true
+			case "false":
+				targetUser.Vegan = false
+			default:
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		} else {
+			targetUser.Vegan = false
+		}
+
+		if !reflect.DeepEqual(targetUser, unchangedUser) {
+			err := database.UpdateUserProfile(database.DB, targetUser)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		http.Redirect(res, req, "/admin/users/"+targetUser.Username+"/profile", http.StatusSeeOther)
+
+	}
+
+	if req.Method == http.MethodGet {
+		data := struct {
+			User   models.User
+			Target models.User
+		}{
+			myUser,
+			targetUser,
+		}
+
+		tpl.ExecuteTemplate(res, "admin-users-profile.html", data)
+	}
+}
+
+// Handles request of "/admin/users/new" page.
+func adminUserNew(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	// process form submission
+	if req.Method == http.MethodPost {
+		// get form values
+		username := req.FormValue("username")
+		password := req.FormValue("password")
+		firstname := req.FormValue("firstname")
+		lastname := req.FormValue("lastname")
+		if username != "" {
+			//check if client tried to create "admin"
+			if username == "admin" {
+				http.Error(res, "Forbidden", http.StatusForbidden)
+				return
+			}
+			// check if username exist/ taken
+			_, err := database.SelectUserByUsername(database.DB, username)
+			if err != nil {
+				if err != sql.ErrNoRows {
+					fmt.Println(err)
+					http.Error(res, "Internal server error", http.StatusInternalServerError)
+					return
+				} else {
+					fmt.Println("User '", username, "' not found. ", err.Error())
+				}
+			} else {
+				fmt.Println(err)
+				http.Error(res, "Username already taken", http.StatusForbidden)
+				return
+			}
+
+			//encrypt password
+			bPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.MinCost)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			myUser = models.User{
+				Username: username,
+				Password: bPassword,
+				First:    firstname,
+				Last:     lastname,
+			}
+			myUser.AdjustStrings()
+
+			err = database.InsertUser(database.DB, myUser) // previouslymapUsers[username] = myUser
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			} else {
+				fmt.Println("User Created:", username)
+			}
+
+		}
+
+		// redirect to admin page (users)
+		http.Redirect(res, req, "/admin/users", http.StatusSeeOther)
+		return
+
+	}
+
+	data := struct {
+		User models.User
+	}{
+		myUser,
+	}
+
+	tpl.ExecuteTemplate(res, "signup.html", data)
+}
+
+// Handles request of "/admin/users/{username}/location" page.
+func adminUserLocation(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetUser, err := database.SelectUserByUsername(database.DB, vars["username"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var mapLink string
+
+	if targetUser.Address != "" {
+		searchResults, err := api.OneMapSearch(targetUser.Address)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		mapLink = api.OneMapGenerateMapPNGSingle(searchResults.Results[0].Latitude, searchResults.Results[0].Longitude)
+	}
+
+	// Prepare data to be sent to template
+	// Sample Data can be of any type. Use Arrays or Maps for 'group' data.
+	data := struct {
+		User    models.User
+		Target  models.User
+		MapLink string
+	}{
+		myUser,
+		targetUser,
+		mapLink,
+	}
+
+	tpl.ExecuteTemplate(res, "admin-users-location.html", data)
+}
+
+// Handles request of "/admin/users/{username}/location/set" page
+func adminUserLocationSet(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetUser, err := database.SelectUserByUsername(database.DB, vars["username"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var searchResults api.OneMapSearchResult
+	var newResults []map[string]string
+
+	if req.Method == http.MethodPost {
+		locationQuery := req.FormValue("locationQuery")
+		var err error
+		searchResults, err = api.OneMapSearch(locationQuery)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		for _, v := range searchResults.Results {
+			var newResultItem map[string]string
+			jV, err := json.Marshal(v)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			err = json.Unmarshal(jV, &newResultItem)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			var mapLinkStruct struct {
+				MapLink string
+			}
+			mapLinkStruct.MapLink = api.OneMapGenerateMapPNGSingle(v.Latitude, v.Longitude)
+
+			jMapLinkStruct, err := json.Marshal(mapLinkStruct)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			err = json.Unmarshal(jMapLinkStruct, &newResultItem)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			newResults = append(newResults, newResultItem)
+
+		}
+	}
+
+	// Prepare data to be sent to template
+	data := struct {
+		User      models.User
+		Target    models.User
+		Locations []map[string]string
+	}{
+		myUser,
+		targetUser,
+		newResults,
+	}
+	tpl.ExecuteTemplate(res, "admin-users-location-set.html", data)
+}
+
+// Handles request of "/admin/users/{username}/location/confirm" page
+func adminUserLocationConfirm(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetUser, err := database.SelectUserByUsername(database.DB, vars["username"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		currentLocation := req.FormValue("currentLocation")
+		searchResult, err := api.OneMapSearch(currentLocation)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		targetUser.Address = searchResult.Results[0].Address
+
+		targetUser.Unit = req.FormValue("unit")
+
+		if searchResult.Results[0].Latitude != "NIL" {
+			targetUser.Lat, err = strconv.ParseFloat(searchResult.Results[0].Latitude, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if searchResult.Results[0].Longitude != "NIL" {
+			targetUser.Lng, err = strconv.ParseFloat(searchResult.Results[0].Longitude, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		err = database.UpdateUserProfile(database.DB, targetUser)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+	}
+	http.Redirect(res, req, "/admin/users/"+targetUser.Username+"/location", http.StatusSeeOther)
+}
+
+// Handles request of "/admin/users/{username}/delete" page
+func adminUserDelete(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	switch vars["username"] {
+	case "admin":
+		http.Redirect(res, req, "/admin/users", http.StatusUnauthorized)
+		return
+
+	case "":
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+
+	default:
+		err := database.DeleteUser(database.DB, vars["username"])
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
+	http.Redirect(res, req, "/admin/users", http.StatusSeeOther)
 }
