@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - RESTAURANT PROFILE</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Restaurant Profile</h2>
+			<h4>ID: {{.Restaurant.ID}}</h4>
+			<h4>Name: {{.Restaurant.Name}}</h4>
+
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants"
+				role="button"
+			>
+				Back to All Restaurants
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/location"
+				role="button"
+			>
+				View Location
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="#"
+				role="button"
+			>
+				Manage Food Items
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="#"
+				role="button"
+			>
+				Manage Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete restaurant of ID: {{.Restaurant.ID}}?')"
+			>
+				Delete Restaurant
+			</a>
+
+			<form class="my-3" method="post">
+				<label for="name">Name:</label>
+				<input
+					type="text"
+					name="name"
+					placeholder="{{.Restaurant.Name}}"
+				/><br />
+				<label for="description">Description:</label><br />
+				<textarea name="description" rows="4" cols="50">{{.Restaurant.Description}}</textarea>
+				<br />
+
+				<input type="checkbox" name="halal" value="true" {{if eq .Restaurant.Halal true}} checked {{end}}>
+                <label for="halal"> Halal</label>
+                <br>
+
+                <input type="checkbox" name="vegan" value="true" {{if eq .Restaurant.Vegan true}} checked {{end}}>
+                <label for="vegan"> Vegetarian</label>
+                <br>
+
+				<br>
+				<button
+					type="submit"
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+				>
+					Update Restaurant Profile
+				</button>
+			</form>
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

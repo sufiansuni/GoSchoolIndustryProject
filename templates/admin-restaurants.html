@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 		<!-- Title -->
-		<title>ADMIN - MANAGE USERS</title>
+		<title>ADMIN - MANAGE RESTAURANTS</title>
 
 		<!-- Bootstrap -->
 		{{template "bootstrap"}}
@@ -25,7 +25,7 @@
 		{{template "navbar" .}}
 		<!-- End of Navbar -->
 		<div class="px-3">
-			<h2>Manage Users</h2>
+			<h2>Manage Restaurants</h2>
 
 			<a
 				class="btn btn-light"
@@ -38,34 +38,33 @@
 			<a
 				class="btn btn-light"
 				style="background-color: #d70f64; color: white"
-				href="/admin/users/new"
+				href="/admin/restaurants/new"
 				role="button"
 			>
-				Create New User
+				Create New Restaurant
 			</a>
 
-			{{if .Users}}
+			{{if .Restaurants}}
 			<table>
 				<thead>
-					<th>Username</th>
-					<th>First Name</th>
-					<th>Last Name</th>
+					<th>ID</th>
+					<th>Name</th>
 					<th>Edit Profile</th>
 					<th>View Location</th>
+					<th>Manage Food Items</th>
 					<th>Manage Orders</th>
-					<th>Delete User</th>
+					<th>Delete Restaurant</th>
 				</thead>
 				<tbody>
-					{{range .Users}}
+					{{range .Restaurants}}
 					<tr>
-						<td>{{.Username}}</td>
-						<td>{{.First}}</td>
-						<td>{{.Last}}</td>
+						<td>{{.ID}}</td>
+						<td>{{.Name}}</td>
 						<td>
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/users/{{.Username}}/profile"
+								href="/admin/restaurants/{{.ID}}/profile"
 								role="button"
 							>
 								Edit Profile
@@ -75,10 +74,20 @@
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/users/{{.Username}}/location"
+								href="/admin/restaurants/{{.ID}}/location"
 								role="button"
 							>
 								View Location
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="#"
+								role="button"
+							>
+								Manage Food Items
 							</a>
 						</td>
 						<td>
@@ -95,11 +104,11 @@
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/users/{{.Username}}/delete"
+								href="/admin/restaurants/{{.ID}}/delete"
 								role="button"
-								onclick="return confirm('Are you sure you want to delete user: {{.Username}}?')"
+								onclick="return confirm('Are you sure you want to delete restaurant of ID: {{.ID}}?')"
 							>
-								Delete User
+								Delete Restaurant
 							</a>
 						</td>
 					</tr>

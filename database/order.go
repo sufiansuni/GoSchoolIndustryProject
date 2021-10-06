@@ -9,13 +9,13 @@ func InsertOrder(myOrder models.Order) error {
 
 	statement := "INSERT INTO orders (Username, Status, Date, Address, PostalCode, Lat, Lng) VALUES (?,?,?,?,?,?,?)"
 	_, err := DB.Exec(statement,
-		myOrder.Username,
-		myOrder.Status,
-		myOrder.Date,
-		myOrder.Address,
-		myOrder.PostalCode,
-		myOrder.Lat,
-		myOrder.Lng,
+		// myOrder.Username,
+		// myOrder.Status,
+		// myOrder.Date,
+		// myOrder.Address,
+		// myOrder.PostalCode,
+		// myOrder.Lat,
+		// myOrder.Lng,
 	)
 	if err != nil {
 		return err
@@ -36,14 +36,14 @@ func SelectOrders(username string, status string) ([]models.Order, error) {
 	defer results.Close()
 	for results.Next() {
 		err := results.Scan(
-			&myOrder.ID,
-			&myOrder.Username,
-			&myOrder.Status,
-			&myOrder.Date,
-			&myOrder.Address,
-			&myOrder.PostalCode,
-			&myOrder.Lat,
-			&myOrder.Lng,
+			// &myOrder.ID,
+			// &myOrder.Username,
+			// &myOrder.Status,
+			// &myOrder.Date,
+			// &myOrder.Address,
+			// &myOrder.PostalCode,
+			// &myOrder.Lat,
+			// &myOrder.Lng,
 		)
 		if err != nil {
 			return myOrders, err
@@ -60,14 +60,14 @@ func UpdateOrder(myOrder models.Order) error {
 		"WHERE ID=?"
 
 	_, err := DB.Exec(statement,
-		myOrder.Username,
-		myOrder.Status,
-		myOrder.Date,
-		myOrder.Address,
-		myOrder.PostalCode,
-		myOrder.Lat,
-		myOrder.Lng,
-		myOrder.ID,
+		// myOrder.Username,
+		// myOrder.Status,
+		// myOrder.Date,
+		// myOrder.Address,
+		// myOrder.PostalCode,
+		// myOrder.Lat,
+		// myOrder.Lng,
+		// myOrder.ID,
 	)
 	if err != nil {
 		return err
