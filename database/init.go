@@ -133,12 +133,22 @@ func CreateOrderTable() {
 		" (" +
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
 		"Username VARCHAR(255), " +
-		"Status VARCHAR(255), " + // cart, past
-		"Date DATE, " +
-		"Address VARCHAR(255), " +
-		"PostalCode MEDIUMINT UNSIGNED, " +
-		"Lat FLOAT, " +
-		"Lng FLOAT" +
+		"RestaurantID MEDIUMINT UNSIGNED, " +
+		"RestaurantName VARCHAR(255), " +
+		"Status VARCHAR(255), " +
+		"Collection VARCHAR(255), " +
+		"Date VARCHAR(255), " +
+		"UserAddress VARCHAR(255), " +
+		"UserUnit VARCHAR(255), " +
+		"UserLat FLOAT, " +
+		"UserLng FLOAT, " +
+		"RestaurantAddress VARCHAR(255), " +
+		"RestaurantUnit VARCHAR(255), " +
+		"RestaurantLat FLOAT, " +
+		"RestaurantLng FLOAT, " +
+		"TotalPrice FLOAT UNSIGNED, " +
+		"TotalCalories MEDIUMINT UNSIGNED, " +
+		"BurnCalories MEDIUMINT UNSIGNED" +
 		")")
 
 	if err != nil {
@@ -156,8 +166,10 @@ func CreateOrderItemTable() {
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
 		"OrderID MEDIUMINT UNSIGNED, " +
 		"FoodID MEDIUMINT UNSIGNED, " +
+		"FoodName VARCHAR(255), " +
 		"Quantity SMALLINT UNSIGNED, " +
-		"Subtotal FLOAT UNSIGNED" +
+		"SubtotalPrice FLOAT UNSIGNED," +
+		"SubtotalCalories MEDIUMINT UNSIGNED" +
 		")")
 
 	if err != nil {

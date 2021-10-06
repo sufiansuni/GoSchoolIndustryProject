@@ -1,12 +1,14 @@
 package models
 
 type Order struct {
-	ID           int
-	Username     string
-	RestaurantID string
-	Status       string // Cart > Awaiting collection > Completed
-	Collection   string // Delivery or Self-Collect
-	Date         string
+	ID             int
+	Username       string
+	RestaurantID   string
+	RestaurantName string
+
+	Status     string // Started > Awaiting Collection > Completed
+	Collection string // Delivery or Self-Collect
+	Date       string
 
 	UserAddress string //User Location Data
 	UserUnit    string
@@ -17,6 +19,8 @@ type Order struct {
 	RestaurantUnit    string
 	RestaurantLat     float64
 	RestaurantLng     float64
+
+	TotalPrice float64
 
 	TotalCalories int
 	BurnCalories  int
