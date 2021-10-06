@@ -35,8 +35,8 @@ func (myUser *User) AdjustStrings() {
 	//titlecase last name
 	myUser.Last = strings.ToLower(myUser.Last)
 	myUser.Last = strings.Title(myUser.Last)
-	//titlecase address
+	//uppercase address
 	myUser.Address = strings.ToUpper(myUser.Address)
-	//titlecase unit
+	//uppercase unit
 	myUser.Unit = strings.ToUpper(myUser.Unit)
 }

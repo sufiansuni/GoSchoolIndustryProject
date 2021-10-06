@@ -228,7 +228,6 @@ func SelectAllUsers(db *sql.DB) (myUsers []models.User, err error) {
 			&myUser.Lat,
 			&myUser.Lng,
 		)
-
 		if err != nil {
 			return nil, err
 		}
