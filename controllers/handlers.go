@@ -59,22 +59,6 @@ func index(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "index.html", data)
 }
 
-// Handles request of restricted page
-// This is a test page. Delete before final deploy.
-func restricted(res http.ResponseWriter, req *http.Request) {
-	myUser := checkUser(res, req)
-	if !alreadyLoggedIn(req) {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
-		return
-	}
-	data := struct {
-		User models.User
-	}{
-		myUser,
-	}
-	tpl.ExecuteTemplate(res, "restricted.html", data)
-}
-
 // Handles request of sign-up page. Also login the user on success.
 func signup(res http.ResponseWriter, req *http.Request) {
 	if alreadyLoggedIn(req) {
@@ -323,41 +307,6 @@ func alreadyLoggedIn(req *http.Request) bool {
 		}
 	}
 	return false
-}
-
-// Handles request of testmap page
-// This is a test page. Delete before final deploy.
-func testmap(res http.ResponseWriter, req *http.Request) {
-	myUser := checkUser(res, req)
-	if !alreadyLoggedIn(req) {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
-		return
-	}
-
-	search1, err := api.OneMapSearch("13 Marsiling Lane")
-	if err != nil {
-		fmt.Println(err)
-	}
-	search2, err := api.OneMapSearch("Woodlands MRT NS9")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	start_lat := search1.Results[0].Latitude
-	start_lng := search1.Results[0].Longitude
-
-	end_lat := search2.Results[0].Latitude
-	end_lng := search2.Results[0].Longitude
-
-	MapPNG := api.OneMapGenerateMapPNGTwoPoints(start_lat, start_lng, end_lat, end_lng)
-	data := struct {
-		User   models.User
-		MapPNG string
-	}{
-		myUser,
-		MapPNG,
-	}
-	tpl.ExecuteTemplate(res, "testmap.html", data)
 }
 
 // Handles request of admin page

@@ -23,23 +23,21 @@ func StartHTTPServer() {
 	HTTPServerInit()
 	r := mux.NewRouter() //New Router Instance
 	r.HandleFunc("/", index)
-	r.HandleFunc("/restricted", restricted)
 	r.HandleFunc("/signup", signup)
 	r.HandleFunc("/login", login)
 	r.HandleFunc("/logout", logout)
 	r.Handle("/favicon.ico", http.NotFoundHandler())
-	r.HandleFunc("/testmap", testmap)
 	r.HandleFunc("/setlocation", setlocation)
 	r.HandleFunc("/confirmlocation", confirmlocation)
 	r.HandleFunc("/profile", profile)
 	r.HandleFunc("/changepassword", changepassword)
 	// r.HandleFunc("/cart", cart)
 
-	// r.HandleFunc("/restaurants", restaurants)
-	// r.HandleFunc("/restaurants/{restaurantID}", restaurantPage)
+	// r.HandleFunc("/restaurants", restaurants) // Restaurant Listing
+	// r.HandleFunc("/restaurants/{restaurantID}", restaurantPage) // Individual Restaurant Page, Food Listing
 	// r.HandleFunc("/restaurants/{restaurantID}/{foodID}", foodPage) // User will set quantity here
-	// r.HandleFunc("/restaurants/{restaurantID}/{foodID}/check", addToCartCheck) // Check if adding will go over calories
-	// r.HandleFunc("/restaurants/{restaurantID}/{foodID}/add", addToCart) // Add to Cart
+	// r.HandleFunc("/restaurants/{restaurantID}/{foodID}/add", addToCart) // Initial check, start new order? add go over calories?
+	// r.HandleFunc("/restaurants/{restaurantID}/{foodID}/addConfirm", addToCartConfirm) // Confirm Add
 
 	r.HandleFunc("/admin", admin)
 
