@@ -18,7 +18,7 @@
 
 		<div class="px-3">
 			<h2>Restaurant Profile</h2>
-			<h4>ID: {{.Restaurant.ID}}</h4>
+			<h4>Restaurant ID: {{.Restaurant.ID}}</h4>
 			<h4>Name: {{.Restaurant.Name}}</h4>
 
 			<a
@@ -40,7 +40,7 @@
 			<a
 				class="btn btn-light"
 				style="background-color: #d70f64; color: white"
-				href="#"
+				href="/admin/restaurants/{{.ID}}"
 				role="button"
 			>
 				Manage Food Items

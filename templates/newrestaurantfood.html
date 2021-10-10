@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 		<!-- Title -->
-		<title>ADMIN - CREATE NEW RESTAURANT</title>
+		<title>ADMIN - CREATE NEW RESTAURANT FOOD</title>
 
 		<!-- Bootstrap -->
 		{{template "bootstrap"}}
@@ -17,24 +17,26 @@
 		<!-- End of Navbar -->
 
 		<div class="px-3">
-			<h2>Create New Restaurant</h2>
-			<h4>Enter the following to create a new restaurant</h4>
+			<h2>Create New Restaurant Food</h2>
+			<h4>Enter the following to create a new restaurant food</h4>
 			<form method="post">
 				<label for="name">Name:</label>
+				<input type="text" name="name" placeholder="Name" required /><br />
+				<label for="name">Price:</label>
+				<input type="text" name="price" placeholder="Price" required /><br />
+				<label for="name">Calories:</label>
 				<input
 					type="text"
-					name="name"
-					placeholder="Restaurant Name"
+					name="calories"
+					placeholder="Calories"
 					required
 				/><br />
-				<label for="description">Description:</label><br />
-				<textarea name="description" rows="4" cols="50"></textarea><br />
 				<button
 					type="submit"
 					class="btn btn-light"
 					style="background-color: #d70f64; color: white"
 				>
-					Create Restaurant
+					Create New Food
 				</button>
 			</form>
 		</div>
