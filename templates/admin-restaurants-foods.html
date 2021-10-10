@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - RESTAURANT - FOODS</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Manage Restaurant Foods</h2>
+			<h4>Restaurant ID: {{.Restaurant.ID}}</h4>
+			<h4>Name: {{.Restaurant.Name}}</h4>
+
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants"
+				role="button"
+			>
+				Back to All Restaurants
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/newfood"
+				role="button"
+			>
+				Create New Food Item
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/profile"
+				role="button"
+			>
+				Edit Profile
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/location"
+				role="button"
+			>
+				View Location
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="#"
+				role="button"
+			>
+				Manage Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete restaurant of ID: {{.Restaurant.ID}}?')"
+			>
+				Delete Restaurant
+			</a>
+
+			{{if .Foods}}
+			<!-- Food Items Go Here -->
+			<table>
+				<thead>
+					<th>Food ID</th>
+					<th>Name</th>
+					<th>Price</th>
+					<th>Calories</th>
+					<th>Edit Food</th>
+					<th>Delete Food</th>
+				</thead>
+				<tbody>
+					{{range .Foods}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.Name}}</td>
+						<td>{{.Price}}</td>
+						<td>{{.Calories}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/restaurants/{{.RestaurantID}}/{{.ID}}"
+								role="button"
+							>
+								Edit Food
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/restaurants/{{.RestaurantID}}/{{.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete food item of ID: {{.ID}}?')"
+							>
+								Delete Food
+							</a>
+						</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+			<!-- No Food Items -->
+			<br />
+			There are no food Items
+			<br />
+			{{end}}
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

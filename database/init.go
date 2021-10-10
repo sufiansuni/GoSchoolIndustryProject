@@ -114,9 +114,7 @@ func CreateFoodTable() {
 		"RestaurantID MEDIUMINT UNSIGNED, " +
 		"Name VARCHAR(255), " +
 		"Price FLOAT UNSIGNED, " +
-		"Calories FLOAT UNSIGNED, " +
-		"Halal BOOL, " +
-		"Vegan BOOL " +
+		"Calories FLOAT UNSIGNED " +
 		")")
 
 	if err != nil {

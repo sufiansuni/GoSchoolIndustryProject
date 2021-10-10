@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - RESTAURANT FOOD</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Edit Restaurant Food</h2>
+			<h4>Food ID: {{.Food.ID}}</h4>
+			<h4>RestaurantID ID: {{.Food.RestaurantID}}</h4>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Food.RestaurantID}}"
+				role="button"
+			>
+				Back to All Foods
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Food.RestaurantID}}/{{.Food.ID}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete food item of ID: {{.Food.ID}}?')"
+			>
+				Delete Food
+			</a>
+
+			<form class="py-2" method="post">
+				<label for="name">Name:</label>
+				<input
+					type="text"
+					name="name"
+					placeholder="{{.Food.Name}}"
+					required
+				/><br />
+				<label for="name">Price:</label>
+				<input
+					type="text"
+					name="price"
+					placeholder="{{.Food.Price}}"
+					required
+				/><br />
+				<label for="name">Calories:</label>
+				<input
+					type="text"
+					name="calories"
+					placeholder="{{.Food.Calories}}"
+					required
+				/><br />
+				<button
+					type="submit"
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+				>
+					Edit Food
+				</button>
+			</form>
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>
