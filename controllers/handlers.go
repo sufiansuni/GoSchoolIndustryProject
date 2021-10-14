@@ -3,6 +3,7 @@ package controllers
 import (
 	"GoIndustryProject/api"
 	"GoIndustryProject/database"
+	"GoIndustryProject/health"
 	"GoIndustryProject/models"
 	"database/sql"
 	"encoding/json"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"reflect"
 	"strconv"
+	"time"
 
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -556,15 +558,23 @@ func profile(res http.ResponseWriter, req *http.Request) {
 		}
 
 		http.Redirect(res, req, "/profile", http.StatusSeeOther)
-
 	}
 
 	if req.Method == http.MethodGet {
+		recommendedCaloriesPerDay, err := UserRecommendedCaloriesPerDay(myUser)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
 		// Prepare data to be sent to template
 		data := struct {
-			User models.User
+			User                      models.User
+			RecommendedCaloriesPerDay int
 		}{
 			myUser,
+			recommendedCaloriesPerDay,
 		}
 		tpl.ExecuteTemplate(res, "profile.html", data)
 	}
@@ -616,4 +626,19 @@ func changepassword(res http.ResponseWriter, req *http.Request) {
 		}
 		tpl.ExecuteTemplate(res, "changepassword.html", data)
 	}
+}
+
+// Helper function to calculate a user's recommended daily calories
+// Returns 0 if required parameters are missing
+func UserRecommendedCaloriesPerDay(myUser models.User) (int, error) {
+	if (myUser.Birthday != "") && (myUser.Gender != "") && (myUser.Height != 0) && (myUser.Weight != 0) && (myUser.ActivityLevel != 0) {
+		userBirthday, err := time.Parse("2006-01-02", myUser.Birthday)
+		if err != nil {
+			return 0, err
+		}
+		userAge := time.Now().Year() - userBirthday.Year()
+		userBMR := health.CalculateBMR(myUser.Gender, myUser.Height, myUser.Weight, userAge)
+		return health.CalculateDailyCalories(userBMR, myUser.ActivityLevel), nil
+	}
+	return 0, nil
 }
