@@ -144,6 +144,7 @@ func CreateOrderTable() {
 		"RestaurantUnit VARCHAR(255), " +
 		"RestaurantLat FLOAT, " +
 		"RestaurantLng FLOAT, " +
+		"TotalItems MEDIUMINT UNSIGNED, " +
 		"TotalPrice FLOAT UNSIGNED, " +
 		"TotalCalories MEDIUMINT UNSIGNED, " +
 		"BurnCalories MEDIUMINT UNSIGNED" +

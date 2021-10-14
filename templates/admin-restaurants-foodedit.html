@@ -23,7 +23,7 @@
 			<a
 				class="btn btn-light"
 				style="background-color: #d70f64; color: white"
-				href="/admin/restaurants/{{.Food.RestaurantID}}"
+				href="/admin/restaurants/{{.Food.RestaurantID}}/foods"
 				role="button"
 			>
 				Back to All Foods
@@ -31,7 +31,7 @@
 			<a
 				class="btn btn-light"
 				style="background-color: #d70f64; color: white"
-				href="/admin/restaurants/{{.Food.RestaurantID}}/{{.Food.ID}}/delete"
+				href="/admin/restaurants/{{.Food.RestaurantID}}/foods/{{.Food.ID}}/delete"
 				role="button"
 				onclick="return confirm('Are you sure you want to delete food item of ID: {{.Food.ID}}?')"
 			>
@@ -44,21 +44,18 @@
 					type="text"
 					name="name"
 					placeholder="{{.Food.Name}}"
-					required
 				/><br />
 				<label for="name">Price:</label>
 				<input
 					type="text"
 					name="price"
 					placeholder="{{.Food.Price}}"
-					required
 				/><br />
 				<label for="name">Calories:</label>
 				<input
 					type="text"
 					name="calories"
 					placeholder="{{.Food.Calories}}"
-					required
 				/><br />
 				<button
 					type="submit"
