@@ -18,8 +18,8 @@ func InsertOrder(db *sql.DB, myOrder models.Order) (err error) {
 	query := "INSERT INTO orders (Username, RestaurantID, RestaurantName, Status, Collection, Date, " +
 		"UserAddress, UserUnit, UserLat, UserLng, " +
 		"RestaurantAddress, RestaurantUnit, RestaurantLat, RestaurantLng, " +
-		"TotalPrice, TotalCalories, BurnCalories) " +
-		"VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+		"TotalItems, TotalPrice, TotalCalories, BurnCalories) " +
+		"VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
 
 	stmt, err := db.PrepareContext(ctx, query)
 	if err != nil {
@@ -42,6 +42,7 @@ func InsertOrder(db *sql.DB, myOrder models.Order) (err error) {
 		myOrder.RestaurantUnit,
 		myOrder.RestaurantLat,
 		myOrder.RestaurantLng,
+		myOrder.TotalItems,
 		myOrder.TotalPrice,
 		myOrder.TotalCalories,
 		myOrder.BurnCalories,
@@ -58,6 +59,38 @@ func InsertOrder(db *sql.DB, myOrder models.Order) (err error) {
 	if rowsAffected == 0 {
 		err = errors.New("no rows updated")
 	}
+	return
+}
+
+// Select/Read an order entry from database with a id input
+func SelectOrderByID(db *sql.DB, ID int) (myOrder models.Order, err error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM orders WHERE ID=?"
+	err = db.QueryRowContext(ctx, query, ID).Scan(
+		&myOrder.ID,
+		&myOrder.Username,
+		&myOrder.RestaurantID,
+		&myOrder.RestaurantName,
+		&myOrder.Status,
+		&myOrder.Collection,
+		&myOrder.Date,
+		&myOrder.UserAddress,
+		&myOrder.UserUnit,
+		&myOrder.UserLat,
+		&myOrder.UserLng,
+		&myOrder.RestaurantAddress,
+		&myOrder.RestaurantUnit,
+		&myOrder.RestaurantLat,
+		&myOrder.RestaurantLng,
+		&myOrder.TotalItems,
+		&myOrder.TotalPrice,
+		&myOrder.TotalCalories,
+		&myOrder.BurnCalories,
+	)
+
 	return
 }
 
@@ -94,6 +127,7 @@ func SelectOrdersByUsernameAndStatus(db *sql.DB, username string, status string)
 			&myOrder.RestaurantUnit,
 			&myOrder.RestaurantLat,
 			&myOrder.RestaurantLng,
+			&myOrder.TotalItems,
 			&myOrder.TotalPrice,
 			&myOrder.TotalCalories,
 			&myOrder.BurnCalories,
@@ -139,6 +173,7 @@ func SelectOrdersByRestaurantIDAndStatus(db *sql.DB, restaurantID int, status st
 			&myOrder.RestaurantUnit,
 			&myOrder.RestaurantLat,
 			&myOrder.RestaurantLng,
+			&myOrder.TotalItems,
 			&myOrder.TotalPrice,
 			&myOrder.TotalCalories,
 			&myOrder.BurnCalories,
@@ -160,7 +195,7 @@ func UpdateOrder(db *sql.DB, myOrder models.Order) (err error) {
 	query := "UPDATE orders SET Username=?, RestaurantID=?, RestaurantName=?, Status=?, Collection=?, Date=?, " +
 		"UserAddress=?, UserUnit=?, UserLat=?, UserLng=?, " +
 		"RestaurantAddress=?, RestaurantUnit=?, RestaurantLat=?, RestaurantLng=?, " +
-		"TotalPrice=?, TotalCalories=?, BurnCalories=? " +
+		"TotalItems=?, TotalPrice=?, TotalCalories=?, BurnCalories=? " +
 		"WHERE ID=?"
 
 	stmt, err := db.PrepareContext(ctx, query)
@@ -184,6 +219,7 @@ func UpdateOrder(db *sql.DB, myOrder models.Order) (err error) {
 		myOrder.RestaurantUnit,
 		myOrder.RestaurantLat,
 		myOrder.RestaurantLng,
+		myOrder.TotalItems,
 		myOrder.TotalPrice,
 		myOrder.TotalCalories,
 		myOrder.BurnCalories,
@@ -230,4 +266,50 @@ func DeleteOrder(db *sql.DB, orderID int) (err error) {
 		err = errors.New("no rows updated")
 	}
 	return
+}
+
+// Select/Read all order entries from database
+func SelectAllOrders(db *sql.DB) ([]models.Order, error) {
+	var myOrders []models.Order
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM orders"
+
+	rows, err := db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var myOrder models.Order
+		err := rows.Scan(
+			&myOrder.ID,
+			&myOrder.Username,
+			&myOrder.RestaurantID,
+			&myOrder.RestaurantName,
+			&myOrder.Status,
+			&myOrder.Collection,
+			&myOrder.Date,
+			&myOrder.UserAddress,
+			&myOrder.UserUnit,
+			&myOrder.UserLat,
+			&myOrder.UserLng,
+			&myOrder.RestaurantAddress,
+			&myOrder.RestaurantUnit,
+			&myOrder.RestaurantLat,
+			&myOrder.RestaurantLng,
+			&myOrder.TotalItems,
+			&myOrder.TotalPrice,
+			&myOrder.TotalCalories,
+			&myOrder.BurnCalories,
+		)
+		if err != nil {
+			return nil, err
+		}
+		myOrders = append(myOrders, myOrder)
+	}
+	return myOrders, err
 }

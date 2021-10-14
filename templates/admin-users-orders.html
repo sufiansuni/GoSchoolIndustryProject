@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - MANAGE USER ORDERS</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>Manage User Orders</h2>
+			<h4>Username: {{.Target.Username}}</h4>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users"
+				role="button"
+			>
+				Back to All Users
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Target.Username}}/profile"
+				role="button"
+			>
+				Edit Profile
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Target.Username}}/location"
+				role="button"
+			>
+				View Location
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Target.Username}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete user: {{.Target.Username}}?')"
+			>
+				Delete User
+			</a>
+
+			<br />
+			<br />
+			<h4>Cart</h4>
+			{{if .Cart.ID}}
+			<!-- If Cart Exists -->
+			OrderID : {{.Cart.ID}}
+			<table>
+				<thead>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+					<th>Manage Order Items</th>
+					<th>View Details</th>
+					<th>Delete Order</th>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{.Cart.RestaurantID}}</td>
+						<td>{{.Cart.RestaurantName}}</td>
+						<td>{{.Cart.Collection}}</td>
+						<td>{{.Cart.Date}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.Cart.ID}}/items"
+								role="button"
+							>
+								Manage Order Items
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.Cart.ID}}/details"
+								role="button"
+							>
+								View Details
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.Cart.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete order of id: {{.Cart.ID}}?')"
+							>
+								Delete Order
+							</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+
+			{{else}}
+
+			<p>No Cart Started</p>
+
+			{{end}}
+
+			<br />
+			<h4>Awaiting Collection</h4>
+			{{if .AwaitingCollection}}
+			<table>
+				<thead>
+					<th>OrderID</th>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+					<th>Manage Order Items</th>
+					<th>View Details</th>
+					<th>Delete Order</th>
+				</thead>
+				<tbody>
+					{{range .AwaitingCollection}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.ID}}/items"
+								role="button"
+							>
+								Manage Order Items
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.ID}}/details"
+								role="button"
+							>
+								View Details
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete order of id: {{.ID}}?')"
+							>
+								Delete Order
+							</a>
+						</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+
+			<p>No Orders Awaiting Collection</p>
+
+			{{end}}
+
+			<br />
+			<h4>Completed</h4>
+			{{if .Completed}}
+			<table>
+				<thead>
+					<th>OrderID</th>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+					<th>Manage Order Items</th>
+					<th>View Details</th>
+					<th>Delete Order</th>
+				</thead>
+				<tbody>
+					{{range .Completed}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.ID}}/items"
+								role="button"
+							>
+								Manage Order Items
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.ID}}/details"
+								role="button"
+							>
+								View Details
+							</a>
+						</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete order of id: {{.ID}}?')"
+							>
+								Delete Order
+							</a>
+						</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+
+			<p>No Completed Orders</p>
+
+			{{end}}
+		</div>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

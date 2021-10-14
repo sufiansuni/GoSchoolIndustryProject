@@ -6,7 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 		<!-- Title -->
-		<title>ADMIN - MANAGE RESTAURANTS</title>
+		<title>ADMIN - MANAGE ORDERS</title>
 
 		<!-- Bootstrap -->
 		{{template "bootstrap"}}
@@ -25,8 +25,7 @@
 		{{template "navbar" .}}
 		<!-- End of Navbar -->
 		<div class="px-3">
-			<h2>Manage Restaurants</h2>
-
+			<h2>Manage Orders</h2>
 			<a
 				class="btn btn-light"
 				style="background-color: #d70f64; color: white"
@@ -35,80 +34,58 @@
 			>
 				Back to Admin Page
 			</a>
-			<a
-				class="btn btn-light"
-				style="background-color: #d70f64; color: white"
-				href="/admin/restaurants/new"
-				role="button"
-			>
-				Create New Restaurant
-			</a>
 
-			{{if .Restaurants}}
+			{{if .Orders}}
 			<table>
 				<thead>
-					<th>Restaurant ID</th>
-					<th>Name</th>
-					<th>Edit Profile</th>
-					<th>View Location</th>
-					<th>Manage Food Items</th>
-					<th>Manage Orders</th>
-					<th>Delete Restaurant</th>
+					<th>OrderID</th>
+					<th>Username</th>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+					<th>Manage Order Items</th>
+					<th>View Details</th>
+					<th>Delete Order</th>
 				</thead>
 				<tbody>
-					{{range .Restaurants}}
+					{{range .Orders}}
 					<tr>
 						<td>{{.ID}}</td>
-						<td>{{.Name}}</td>
+						<td>{{.Username}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
 						<td>
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/restaurants/{{.ID}}/profile"
+								href="/admin/orders/{{.ID}}/items"
 								role="button"
 							>
-								Edit Profile
+								Manage Order Items
 							</a>
 						</td>
 						<td>
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/restaurants/{{.ID}}/location"
+								href="/admin/orders/{{.ID}}/details"
 								role="button"
 							>
-								View Location
+								View Details
 							</a>
 						</td>
 						<td>
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/restaurants/{{.ID}}/foods"
+								href="/admin/orders/{{.ID}}/delete"
 								role="button"
+								onclick="return confirm('Are you sure you want to delete order of id: {{.ID}}?')"
 							>
-								Manage Food Items
-							</a>
-						</td>
-						<td>
-							<a
-								class="btn btn-light"
-								style="background-color: #d70f64; color: white"
-								href="/admin/restaurants/{{.ID}}/orders"
-								role="button"
-							>
-								Manage Orders
-							</a>
-						</td>
-						<td>
-							<a
-								class="btn btn-light"
-								style="background-color: #d70f64; color: white"
-								href="/admin/restaurants/{{.ID}}/delete"
-								role="button"
-								onclick="return confirm('Are you sure you want to delete restaurant of ID: {{.ID}}?')"
-							>
-								Delete Restaurant
+								Delete Order
 							</a>
 						</td>
 					</tr>
@@ -116,8 +93,10 @@
 				</tbody>
 			</table>
 			{{else}}
-			<br />
-			There Are No Restaurants... {{end}}
+
+			<p>There Are No Orders</p>
+
+			{{end}}
 		</div>
 		<!-- Bootstrap Javascript -->
 		{{template "bootstrap-javascript"}}
