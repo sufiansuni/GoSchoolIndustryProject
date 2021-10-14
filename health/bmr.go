@@ -1,11 +1,13 @@
 package health
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Calculate BMR from gender, height(cm), weight(kg) and age(years) inputs.
 // BMR result is in calories per day.
 // https://www.calculator.net/bmr-calculator.html
-func CalculateBMR(gender string, height float64, weight float64, age float64) float64 {
+func CalculateBMR(gender string, height int, weight float64, age int) float64 {
 	// Mifflin-St Jeor Equation:
 	// W is body weight in kg
 	// H is body height in cm
@@ -14,11 +16,11 @@ func CalculateBMR(gender string, height float64, weight float64, age float64) fl
 	case "Male":
 		// For men:
 		// BMR = 10W + 6.25H - 5A + 5
-		return (10 * weight) + (6.25 * height) - (5 * age) + 5
+		return (10 * weight) + (6.25 * float64(height)) - (5 * float64(age)) + 5
 	case "Female":
 		// For women:
 		// BMR = 10W + 6.25H - 5A - 161
-		return (10 * weight) + (6.25 * height) - (5 * age) - 161
+		return (10 * weight) + (6.25 * float64(height)) - (5 * float64(age)) - 161
 	default:
 		fmt.Println("Invalid Gender Input when calculating BMR")
 		return 0
@@ -35,20 +37,20 @@ func CalculateBMR(gender string, height float64, weight float64, age float64) fl
 // If you are extra active (very hard exercise/sports & a physical job) : Calorie-Calculation = BMR x 1.9
 
 // Calculate recommended daily calories based on BMR and Activity level inputs.
-func CalculateDailyCalories(BMR float64, activity int) float64 {
+func CalculateDailyCalories(BMR float64, activity int) int {
 	switch activity {
 	case 1:
-		return BMR * 1.2
+		return int(BMR * 1.2)
 	case 2:
-		return BMR * 1.375
+		return int(BMR * 1.375)
 	case 3:
-		return BMR * 1.55
+		return int(BMR * 1.55)
 	case 4:
-		return BMR * 1.725
+		return int(BMR * 1.725)
 	case 5:
-		return BMR * 1.9
+		return int(BMR * 1.9)
 	default:
 		fmt.Println("Activity Level not 1-5 when calculating recommended daily calories")
-		return BMR
+		return int(BMR)
 	}
 }

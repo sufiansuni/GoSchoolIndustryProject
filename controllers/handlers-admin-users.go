@@ -251,12 +251,20 @@ func adminUserProfile(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method == http.MethodGet {
+		recommendedCaloriesPerDay, err := UserRecommendedCaloriesPerDay(targetUser)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
 		data := struct {
-			User   models.User
-			Target models.User
+			User                      models.User
+			Target                    models.User
+			RecommendedCaloriesPerDay int
 		}{
 			myUser,
 			targetUser,
+			recommendedCaloriesPerDay,
 		}
 
 		tpl.ExecuteTemplate(res, "admin-users-profile.html", data)
