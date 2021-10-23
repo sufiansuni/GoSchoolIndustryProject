@@ -55,9 +55,9 @@ func StartHTTPServer() {
 	r.HandleFunc("/admin/restaurants", adminRestaurants)
 	r.HandleFunc("/admin/restaurants/new", adminRestaurantNew)
 	r.HandleFunc("/admin/restaurants/{restaurantID}/profile", adminRestaurantProfile)
-	// r.HandleFunc("/admin/restaurants/{restaurantID}/location", adminRestaurantLocation)
-	// r.HandleFunc("/admin/restaurants/{restaurantID}/location/set", adminRestaurantLocationSet)
-	// r.HandleFunc("/admin/restaurants/{restaurantID}/location/confirm", adminRestaurantLocationConfirm)
+	r.HandleFunc("/admin/restaurants/{restaurantID}/location", adminRestaurantLocation)
+	r.HandleFunc("/admin/restaurants/{restaurantID}/location/set", adminRestaurantLocationSet)
+	r.HandleFunc("/admin/restaurants/{restaurantID}/location/confirm", adminRestaurantLocationConfirm)
 	r.HandleFunc("/admin/restaurants/{restaurantID}/orders", adminRestaurantOrders)
 	r.HandleFunc("/admin/restaurants/{restaurantID}/delete", adminRestaurantDelete)
 
