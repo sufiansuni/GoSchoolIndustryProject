@@ -1128,6 +1128,43 @@ func adminRestaurants(res http.ResponseWriter, req *http.Request) {
 	}
 	tpl.ExecuteTemplate(res, "admin-restaurants.html", data)
 }
+func userCart(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	var myOrders []models.Order
+	var myOrderItems []models.OrderItem
+	myOrders, err := database.SelectOrdersByUsernameAndStatus(database.DB, myUser.Username, "Started")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	var myOrder models.Order
+	if len(myOrders) != 0 {
+		myOrder = myOrders[0]
+		myOrderItems, err = database.SelectOrderItemsByOrderID(database.DB, myOrders[0].ID)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	data := struct {
+		User       models.User
+		Order      models.Order
+		OrderItems []models.OrderItem
+	}{
+		myUser,
+		myOrder,
+		myOrderItems,
+	}
+	tpl.ExecuteTemplate(res, "cart.html", data)
+}
 
 // Handles request of "/admin/restaurants/{restaurantID}/profile" page
 func adminRestaurantProfile(res http.ResponseWriter, req *http.Request) {

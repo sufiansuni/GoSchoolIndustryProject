@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>MY CART</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>MY CART</h2>
+
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/Restaurants"
+				role="button"
+			>
+				Back to Restaurants
+			</a>
+			{{if gt .Orders.OrderID 0}}
+			{{.OrderID}}
+			{{.RestaurantName}}
+			{{.RestaurantAddress}}
+			{{.Collection}}
+			{{end}}
+			{{if .OrderItems}}
+			<table>
+				<thead>
+					<th>ID</th>
+					<th>Food Name</th>
+					<th>Quantity</th>
+					<th>Subtotal Price</th>
+                    <th>Subtotal Calories</th>
+					<th>Delete Food</th>
+				</thead>
+				<tbody>
+					{{range .OrderItems}}
+					<tr>
+						<td>{{.ID}}</td>
+                        <td>{{.FoodID}}</td>
+						<td>{{.FoodName}}</td>
+                        <td>{{.Quantity}}</td>
+                        
+                        <td>{{.SubtotalPrice}}</td>
+                        <td>{{.SubtotalCalories}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/user/Food/{{.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete Food: {{.ID}}?')"
+							>
+								Delete Food
+							</a>
+
+						</td>
+
+					</tr>
+					{{end}}
+                    {{.TotalPrice}}
+                    {{.TotalCalories}}
+				</tbody>
+			</table>
+
+			{{else}}
+			<br />
+			There Are No orders... {{end}}
+		</div>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>
