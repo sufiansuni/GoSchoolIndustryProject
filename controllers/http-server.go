@@ -31,7 +31,8 @@ func StartHTTPServer() {
 	r.HandleFunc("/confirmlocation", confirmlocation)
 	r.HandleFunc("/profile", profile)
 	r.HandleFunc("/changepassword", changepassword)
-	// r.HandleFunc("/cart", cart)
+
+	r.HandleFunc("/cart", userCart)
 	// r.HandleFunc("/cart/confirm", cartConfirm)
 
 	// r.HandleFunc("/restaurants", restaurants) // Restaurant Listing
