@@ -5,7 +5,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <!-- Title -->
+		<!-- Title -->
 		<title>ADMIN - USER LOCATION</title>
 
 		<!-- Bootstrap -->
@@ -38,7 +38,7 @@
 			<a
 				class="btn btn-light"
 				style="background-color: #d70f64; color: white"
-				href="#"
+				href="/admin/users/{{.Target.Username}}/orders"
 				role="button"
 			>
 				Manage Orders
@@ -55,32 +55,22 @@
 
 			<br />
 			<br />
-			<b>Address</b>: 
-			{{if .Target.Address}}
-				{{.Target.Address}}
-				<a href= "{{.MapLink}}" target="_blank">View Map</a>
-			{{else}}
-				Not Set
-			{{end}}
+			<b>Address</b>: {{if .Target.Address}} {{.Target.Address}}
+			<a href="{{.MapLink}}" target="_blank">View Map</a>
+			{{else}} Not Set {{end}}
 			<br />
-			<b>Unit</b>: 
-			{{if .Target.Unit}} 
-				{{.Target.Unit}} 
-			{{else}} 
-				Not Set 
-			{{end}}
+			<b>Unit</b>: {{if .Target.Unit}} {{.Target.Unit}} {{else}} Not Set {{end}}
 			<br />
-			
+
 			<br />
-            <h4>Set New Location</h4>
+			<h4>Set New Location</h4>
 			Enter Street Name or Postal Code
-			<form action="/admin/users/{{.Target.Username}}/location/set" method="post">
+			<form
+				action="/admin/users/{{.Target.Username}}/location/set"
+				method="post"
+			>
 				<div class="form-group w-50">
-					<input
-						type="text"
-						class="form-control"
-						name="locationQuery"
-					/>
+					<input type="text" class="form-control" name="locationQuery" />
 				</div>
 				<button
 					type="submit"

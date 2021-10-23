@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - ORDER DETAILS</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Order Details</h2>
+			<h4>OrderID: {{.Order.ID}}</h4>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/orders"
+				role="button"
+			>
+				Back to All Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Order.Username}}/orders"
+				role="button"
+			>
+				User's Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Order.RestaurantID}}/orders"
+				role="button"
+			>
+				Restaurant's Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/orders/{{.Order.ID}}/items"
+				role="button"
+			>
+				Manage Order Items
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/orders/{{.Order.ID}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete order of id: {{.Order.ID}}?')"
+			>
+				Delete Order
+			</a>
+
+			<br />
+			<h4>Involved Parties</h4>
+			<b>Username</b>: {{.Order.Username}} <br />
+			<b>RestaurantID</b>: {{.Order.RestaurantID}} <br />
+			<b>Restaurant Name</b>: {{.Order.RestaurantName}} <br />
+
+			<br />
+			<h4>Collection Details</h4>
+			<b>Status</b>: {{.Order.Status}} <br />
+			<b>Collection</b>: {{.Order.Collection}} <br />
+			<b>Date</b>:{{.Order.Date}} <br />
+
+			<br />
+			<h4>User Location</h4>
+			<b>Address</b>: {{if .Order.UserAddress}} {{.Order.UserAddress}}
+			<a href="{{.UserMapLink}}" target="_blank">View Map</a>
+			{{else}} Not Set {{end}}
+			<br />
+			<b>Unit</b>: {{if .Order.UserUnit}} {{.Order.UserUnit}} {{else}} Not Set
+			{{end}}
+			<br />
+
+			<br />
+			<h4>Restaurant Location</h4>
+			<b>Address</b>: {{if .Order.RestaurantAddress}}
+			{{.Order.RestaurantAddress}}
+			<a href="{{.RestaurantMapLink}}" target="_blank">View Map</a>
+			{{else}} Not Set {{end}}
+			<br />
+			<b>Unit</b>: {{if .Order.RestaurantUnit}} {{.Order.RestaurantUnit}}
+			{{else}} Not Set {{end}}
+			<br />
+
+			<br />
+			<h4>Totals</h4>
+			<b>Total Items</b>: {{.Order.TotalItems}} <br />
+			<b>Total Price</b>: {{.Order.TotalPrice}} <br />
+			<b>Total Calories</b>: {{.Order.TotalCalories}} <br />
+			<b>Burn Calories</b>: {{.Order.BurnCalories}} <br />
+
+			<br />
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

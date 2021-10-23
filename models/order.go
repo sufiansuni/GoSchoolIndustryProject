@@ -20,6 +20,7 @@ type Order struct {
 	RestaurantLat     float64
 	RestaurantLng     float64
 
+	TotalItems int
 	TotalPrice float64
 
 	TotalCalories int

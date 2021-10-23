@@ -1,6 +1,11 @@
 package database
 
-import "GoIndustryProject/models"
+import (
+	"GoIndustryProject/models"
+	"context"
+	"database/sql"
+	"time"
+)
 
 // Operations for food database: Insert(Create), Select(Read), Update, Delete
 
@@ -26,8 +31,8 @@ func SelectFood(ID int) (models.Food, error) {
 
 	err := DB.QueryRow(query, ID).Scan(
 		&myFood.ID,
-		&myFood.Name,
 		&myFood.RestaurantID,
+		&myFood.Name,
 		&myFood.Price,
 		&myFood.Calories,
 	)
@@ -36,11 +41,12 @@ func SelectFood(ID int) (models.Food, error) {
 
 // Update a restaurant entry in database
 func UpdateFood(myFood models.Food) error {
-	statement := "UPDATE foods SET RestaurantID=?, Name?, Price =?, Calories =?, Halal=?, Vegan=? " +
+	statement := "UPDATE foods SET RestaurantID=?, Name=?, Price =?, Calories =? " +
 		"WHERE ID=?"
 
 	_, err := DB.Exec(statement,
 		myFood.RestaurantID,
+		myFood.Name,
 		myFood.Price,
 		myFood.Calories,
 		myFood.ID,
@@ -59,4 +65,34 @@ func DeleteFood(ID int) error {
 		return err
 	}
 	return nil
+}
+
+// Select/Read All User Entries
+func SelectAllFoodsByRestaurantID(db *sql.DB, restaurantID int) (myFoods []models.Food, err error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	rows, err := db.QueryContext(ctx, "SELECT * FROM foods WHERE RestaurantID=?", restaurantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var myFood models.Food
+		err = rows.Scan(
+			&myFood.ID,
+			&myFood.RestaurantID,
+			&myFood.Name,
+			&myFood.Price,
+			&myFood.Calories,
+		)
+		if err != nil {
+			return nil, err
+		}
+		myFoods = append(myFoods, myFood)
+	}
+
+	return
 }

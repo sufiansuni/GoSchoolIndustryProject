@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - MANAGE ORDER ITEMS</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>Manage Order Items</h2>
+			<h4>Order ID: {{.Order.ID}}</h4>
+			<h4>Username: {{.Order.Username}}</h4>
+			<h4>Restaurant: {{.Order.RestaurantName}}</h4>
+
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/orders"
+				role="button"
+			>
+				Back to All Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/users/{{.Order.Username}}/orders"
+				role="button"
+			>
+				User's Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Order.RestaurantID}}/orders"
+				role="button"
+			>
+				Restaurant's Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/orders/{{.Order.ID}}/details"
+				role="button"
+			>
+				View Details
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/orders/{{.Order.ID}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete order of id: {{.Order.ID}}?')"
+			>
+				Delete Order
+			</a>
+
+			{{if .OrderItems}}
+			<table>
+				<thead>
+					<th>ItemID</th>
+					<th>FoodID</th>
+					<th>Food Name</th>
+					<th colspan="3">Quantity</th>
+					<th>Subtotal Price</th>
+					<th>Subtotal Calories</th>
+					<th>Delete Item</th>
+				</thead>
+				<tbody>
+					{{range .OrderItems}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.FoodID}}</td>
+						<td>{{.FoodName}}</td>
+						<td style="border-right: 0">
+							<a
+								class="btn btn-light btn-sm"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.OrderID}}/items/{{.ID}}/subtract"
+								role="button"
+							>
+								-
+							</a>
+						</td>
+						<td style="border: 0">{{.Quantity}}</td>
+						<td style="border-left: 0">
+							<a
+								class="btn btn-light btn-sm"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.OrderID}}/items/{{.ID}}/add"
+								role="button"
+							>
+								+
+							</a>
+						</td>
+						<td>{{.SubtotalPrice}}</td>
+						<td>{{.SubtotalCalories}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/admin/orders/{{.OrderID}}/items/{{.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to delete item of id: {{.ID}}?')"
+							>
+								Delete Item
+							</a>
+						</td>
+					</tr>
+					{{end}}
+					<tr>
+						<td colspan="3" style="text-align: right"><b>Totals:</b></td>
+						<td colspan="3">{{.Order.TotalItems}}</td>
+						<td>{{.Order.TotalPrice}}</td>
+						<td>{{.Order.TotalCalories}}</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+			{{else}}
+
+			<p>There Are No Order Items</p>
+
+			{{end}}
+		</div>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>
