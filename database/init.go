@@ -113,6 +113,7 @@ func CreateFoodTable() {
 		"ID MEDIUMINT UNSIGNED PRIMARY KEY AUTO_INCREMENT, " +
 		"RestaurantID MEDIUMINT UNSIGNED, " +
 		"Name VARCHAR(255), " +
+		"Description VARCHAR(255), " +
 		"Price FLOAT UNSIGNED, " +
 		"Calories FLOAT UNSIGNED " +
 		")")
