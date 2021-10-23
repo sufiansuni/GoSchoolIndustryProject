@@ -561,7 +561,7 @@ func profile(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method == http.MethodGet {
-		recommendedCaloriesPerDay, err := UserRecommendedCaloriesPerDay(myUser)
+		recommendedCaloriesPerDay, err := userRecommendedCaloriesPerDay(myUser)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -578,6 +578,21 @@ func profile(res http.ResponseWriter, req *http.Request) {
 		}
 		tpl.ExecuteTemplate(res, "profile.html", data)
 	}
+}
+
+// Helper function to calculate a user's recommended daily calories
+// Returns 0 if required parameters are missing
+func userRecommendedCaloriesPerDay(myUser models.User) (int, error) {
+	if (myUser.Birthday != "") && (myUser.Gender != "") && (myUser.Height != 0) && (myUser.Weight != 0) && (myUser.ActivityLevel != 0) {
+		userBirthday, err := time.Parse("2006-01-02", myUser.Birthday)
+		if err != nil {
+			return 0, err
+		}
+		userAge := time.Now().Year() - userBirthday.Year()
+		userBMR := health.CalculateBMR(myUser.Gender, myUser.Height, myUser.Weight, userAge)
+		return health.CalculateDailyCalories(userBMR, myUser.ActivityLevel), nil
+	}
+	return 0, nil
 }
 
 // Handles request of changepassword page
@@ -628,17 +643,41 @@ func changepassword(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Helper function to calculate a user's recommended daily calories
-// Returns 0 if required parameters are missing
-func UserRecommendedCaloriesPerDay(myUser models.User) (int, error) {
-	if (myUser.Birthday != "") && (myUser.Gender != "") && (myUser.Height != 0) && (myUser.Weight != 0) && (myUser.ActivityLevel != 0) {
-		userBirthday, err := time.Parse("2006-01-02", myUser.Birthday)
-		if err != nil {
-			return 0, err
-		}
-		userAge := time.Now().Year() - userBirthday.Year()
-		userBMR := health.CalculateBMR(myUser.Gender, myUser.Height, myUser.Weight, userAge)
-		return health.CalculateDailyCalories(userBMR, myUser.ActivityLevel), nil
+// Handles request of "/cart" page
+func userCart(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
 	}
-	return 0, nil
+
+	var myOrders []models.Order
+	var myOrderItems []models.OrderItem
+	myOrders, err := database.SelectOrdersByUsernameAndStatus(database.DB, myUser.Username, "Started")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	var myOrder models.Order
+	if len(myOrders) != 0 {
+		myOrder = myOrders[0]
+		myOrderItems, err = database.SelectOrderItemsByOrderID(database.DB, myOrders[0].ID)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	data := struct {
+		User       models.User
+		Order      models.Order
+		OrderItems []models.OrderItem
+	}{
+		myUser,
+		myOrder,
+		myOrderItems,
+	}
+	tpl.ExecuteTemplate(res, "cart.html", data)
 }
