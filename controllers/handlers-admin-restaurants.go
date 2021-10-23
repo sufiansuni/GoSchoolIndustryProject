@@ -368,7 +368,7 @@ func adminRestaurantLocationSet(res http.ResponseWriter, req *http.Request) {
 	var locationQuery string
 
 	if req.Method == http.MethodPost {
-		locationQuery := req.FormValue("locationQuery")
+		locationQuery = req.FormValue("locationQuery")
 		var err error
 		searchResults, err = api.OneMapSearch(locationQuery)
 		if err != nil {
