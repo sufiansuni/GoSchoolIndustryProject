@@ -247,11 +247,10 @@ func adminUserProfile(res http.ResponseWriter, req *http.Request) {
 		}
 
 		http.Redirect(res, req, "/admin/users/"+targetUser.Username+"/profile", http.StatusSeeOther)
-
 	}
 
 	if req.Method == http.MethodGet {
-		recommendedCaloriesPerDay, err := UserRecommendedCaloriesPerDay(targetUser)
+		recommendedCaloriesPerDay, err := userRecommendedCaloriesPerDay(targetUser)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
