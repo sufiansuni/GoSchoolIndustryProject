@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>ADMIN - RESTAURANT LOCATION</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Restaurant Location</h2>
+			<h4>RestaurantID: {{.Restaurant.ID}}</h4>
+            <h4>Restaurant Name: {{.Restaurant.Name}}</h4>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants"
+				role="button"
+			>
+				Back to All Restaurants
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/profile"
+				role="button"
+			>
+				Edit Profile
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/orders"
+				role="button"
+			>
+				Manage Orders
+			</a>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/admin/restaurants/{{.Restaurant.ID}}/delete"
+				role="button"
+				onclick="return confirm('Are you sure you want to delete restaurant of ID: {{.Restaurant.ID}}?')"
+			>
+				Delete Restaurant
+			</a>
+
+			<br />
+			<br />
+			<b>Address</b>: {{if .Restaurant.Address}} {{.Restaurant.Address}}
+			<a href="{{.MapLink}}" target="_blank">View Map</a>
+			{{else}} Not Set {{end}}
+			<br />
+			<b>Unit</b>: {{if .Restaurant.Unit}} {{.Restaurant.Unit}} {{else}} Not Set {{end}}
+			<br />
+
+			<br />
+			<h4>Set New Location</h4>
+			Enter Street Name or Postal Code
+			<form
+				action="/admin/restaurants/{{.Restaurant.ID}}/location/set"
+				method="post"
+			>
+				<div class="form-group w-50">
+					<input type="text" class="form-control" name="locationQuery" />
+				</div>
+				<button
+					type="submit"
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+				>
+					Set Location
+				</button>
+			</form>
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

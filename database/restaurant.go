@@ -11,14 +11,14 @@ import (
 
 // Insert a new restaurant entry into database
 func InsertRestaurant(myRestaurant models.Restaurant) error {
-	statement := "INSERT INTO restaurants (Name, Description, Halal, Vegan, Address, PostalCode, Lat, Lng) VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
+	statement := "INSERT INTO restaurants (Name, Description, Halal, Vegan, Address, Unit, Lat, Lng) VALUES(?, ?, ?, ?, ?, ?, ?, ?)"
 	_, err := DB.Exec(statement,
 		myRestaurant.Name,
 		myRestaurant.Description,
 		myRestaurant.Halal,
 		myRestaurant.Vegan,
 		myRestaurant.Address,
-		myRestaurant.PostalCode,
+		myRestaurant.Unit,
 		myRestaurant.Lat,
 		myRestaurant.Lng)
 	if err != nil {
@@ -39,7 +39,7 @@ func SelectRestaurant(ID int) (models.Restaurant, error) {
 		&myRestaurant.Halal,
 		&myRestaurant.Vegan,
 		&myRestaurant.Address,
-		&myRestaurant.PostalCode,
+		&myRestaurant.Unit,
 		&myRestaurant.Lat,
 		&myRestaurant.Lng,
 	)
@@ -48,7 +48,7 @@ func SelectRestaurant(ID int) (models.Restaurant, error) {
 
 // Update a restaurant entry in database
 func UpdateRestaurant(myRestaurant models.Restaurant) error {
-	statement := "UPDATE restaurants SET Name=?, Description =?, Halal=?, Vegan=?, Address=?, PostalCode=?, Lat =?, Lng=? " +
+	statement := "UPDATE restaurants SET Name=?, Description =?, Halal=?, Vegan=?, Address=?, Unit=?, Lat =?, Lng=? " +
 		"WHERE ID=?"
 
 	_, err := DB.Exec(statement,
@@ -57,7 +57,7 @@ func UpdateRestaurant(myRestaurant models.Restaurant) error {
 		myRestaurant.Halal,
 		myRestaurant.Vegan,
 		myRestaurant.Address,
-		myRestaurant.PostalCode,
+		myRestaurant.Unit,
 		myRestaurant.Lat,
 		myRestaurant.Lng,
 		myRestaurant.ID,
@@ -99,7 +99,7 @@ func SelectAllRestaurants(db *sql.DB) (myRestaurants []models.Restaurant, err er
 			&myRestaurant.Halal,
 			&myRestaurant.Vegan,
 			&myRestaurant.Address,
-			&myRestaurant.PostalCode,
+			&myRestaurant.Unit,
 			&myRestaurant.Lat,
 			&myRestaurant.Lng,
 		)

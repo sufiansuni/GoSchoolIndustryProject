@@ -93,7 +93,7 @@ func CreateRestaurantTable() {
 		"Halal BOOL, " +
 		"Vegan BOOL, " +
 		"Address VARCHAR(255), " +
-		"PostalCode MEDIUMINT UNSIGNED, " +
+		"Unit VARCHAR(255), " +
 		"Lat FLOAT, " +
 		"Lng FLOAT" +
 		")")

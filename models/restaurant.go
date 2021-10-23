@@ -7,7 +7,7 @@ type Restaurant struct {
 	Halal       bool
 	Vegan       bool
 	Address     string
-	PostalCode  int
+	Unit        string
 	Lat         float64
 	Lng         float64
 }

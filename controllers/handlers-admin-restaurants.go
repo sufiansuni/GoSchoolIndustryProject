@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"GoIndustryProject/api"
 	"GoIndustryProject/database"
 	"GoIndustryProject/models"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -282,4 +284,226 @@ func adminRestaurantDelete(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	http.Redirect(res, req, "/admin/restaurants", http.StatusSeeOther)
+}
+
+// Handles request of "/admin/restaurants/{restaurantID}/location" page
+func adminRestaurantLocation(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetID, err := strconv.Atoi(vars["restaurantID"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	targetRestaurant, err := database.SelectRestaurant(targetID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var mapLink string
+
+	if targetRestaurant.Address != "" {
+		mapLink = api.OneMapGenerateMapPNGSingle(fmt.Sprintf("%f", targetRestaurant.Lat), fmt.Sprintf("%f", targetRestaurant.Lng))
+	}
+
+	// Prepare data to be sent to template
+	// Sample Data can be of any type. Use Arrays or Maps for 'group' data.
+	data := struct {
+		User       models.User
+		Restaurant models.Restaurant
+		MapLink    string
+	}{
+		myUser,
+		targetRestaurant,
+		mapLink,
+	}
+
+	tpl.ExecuteTemplate(res, "admin-restaurants-location.gohtml", data)
+}
+
+// Handles request of "/admin/restaurants/{restaurantID}/location/set" page
+func adminRestaurantLocationSet(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetID, err := strconv.Atoi(vars["restaurantID"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	targetRestaurant, err := database.SelectRestaurant(targetID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	var searchResults api.OneMapSearchResult
+	var newResults []map[string]string
+	var locationQuery string
+
+	if req.Method == http.MethodPost {
+		locationQuery = req.FormValue("locationQuery")
+		var err error
+		searchResults, err = api.OneMapSearch(locationQuery)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		for _, v := range searchResults.Results {
+			var newResultItem map[string]string
+			jV, err := json.Marshal(v)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			err = json.Unmarshal(jV, &newResultItem)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			var mapLinkStruct struct {
+				MapLink string
+			}
+			mapLinkStruct.MapLink = api.OneMapGenerateMapPNGSingle(v.Latitude, v.Longitude)
+
+			jMapLinkStruct, err := json.Marshal(mapLinkStruct)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			err = json.Unmarshal(jMapLinkStruct, &newResultItem)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			newResults = append(newResults, newResultItem)
+
+		}
+	}
+
+	// Prepare data to be sent to template
+	data := struct {
+		User          models.User
+		Restaurant    models.Restaurant
+		Locations     []map[string]string
+		LocationQuery string
+	}{
+		myUser,
+		targetRestaurant,
+		newResults,
+		locationQuery,
+	}
+	tpl.ExecuteTemplate(res, "admin-restaurants-location-set.gohtml", data)
+}
+
+// Handles request of "/admin/users/{username}/location/confirm" page
+func adminRestaurantLocationConfirm(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	if myUser.Username != "admin" {
+		http.Redirect(res, req, "/", http.StatusUnauthorized)
+		return
+	}
+
+	vars := mux.Vars(req)
+	targetID, err := strconv.Atoi(vars["restaurantID"])
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	targetRestaurant, err := database.SelectRestaurant(targetID)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		locationQuery := req.FormValue("locationQuery")
+		locationNumberString := req.FormValue("locationNumber")
+		locationNumber, err := strconv.Atoi(locationNumberString)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		searchResult, err := api.OneMapSearch(locationQuery)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		targetRestaurant.Address = searchResult.Results[locationNumber].Address
+
+		targetRestaurant.Unit = req.FormValue("unit")
+
+		if searchResult.Results[locationNumber].Latitude != "NIL" {
+			targetRestaurant.Lat, err = strconv.ParseFloat(searchResult.Results[locationNumber].Latitude, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		if searchResult.Results[locationNumber].Longitude != "NIL" {
+			targetRestaurant.Lng, err = strconv.ParseFloat(searchResult.Results[locationNumber].Longitude, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
+		err = database.UpdateRestaurant(targetRestaurant)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+	}
+	http.Redirect(res, req, "/admin/restaurants/"+vars["restaurantID"]+"/location", http.StatusSeeOther)
 }
