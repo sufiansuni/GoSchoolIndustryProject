@@ -294,14 +294,7 @@ func adminUserLocation(res http.ResponseWriter, req *http.Request) {
 	var mapLink string
 
 	if targetUser.Address != "" {
-		searchResults, err := api.OneMapSearch(targetUser.Address)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		mapLink = api.OneMapGenerateMapPNGSingle(searchResults.Results[0].Latitude, searchResults.Results[0].Longitude)
+		mapLink = api.OneMapGenerateMapPNGSingle(fmt.Sprintf("%f", targetUser.Lat), fmt.Sprintf("%f", targetUser.Lng))
 	}
 
 	// Prepare data to be sent to template
@@ -342,9 +335,10 @@ func adminUserLocationSet(res http.ResponseWriter, req *http.Request) {
 
 	var searchResults api.OneMapSearchResult
 	var newResults []map[string]string
+	var locationQuery string
 
 	if req.Method == http.MethodPost {
-		locationQuery := req.FormValue("locationQuery")
+		locationQuery = req.FormValue("locationQuery")
 		var err error
 		searchResults, err = api.OneMapSearch(locationQuery)
 		if err != nil {
@@ -393,13 +387,15 @@ func adminUserLocationSet(res http.ResponseWriter, req *http.Request) {
 
 	// Prepare data to be sent to template
 	data := struct {
-		User      models.User
-		Target    models.User
-		Locations []map[string]string
+		User          models.User
+		Target        models.User
+		Locations     []map[string]string
+		LocationQuery string
 	}{
 		myUser,
 		targetUser,
 		newResults,
+		locationQuery,
 	}
 	tpl.ExecuteTemplate(res, "admin-users-location-set.html", data)
 }
@@ -426,20 +422,28 @@ func adminUserLocationConfirm(res http.ResponseWriter, req *http.Request) {
 	}
 
 	if req.Method == http.MethodPost {
-		currentLocation := req.FormValue("currentLocation")
-		searchResult, err := api.OneMapSearch(currentLocation)
+		locationQuery := req.FormValue("locationQuery")
+		locationNumberString := req.FormValue("locationNumber")
+		locationNumber, err := strconv.Atoi(locationNumberString)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
-		targetUser.Address = searchResult.Results[0].Address
+		searchResult, err := api.OneMapSearch(locationQuery)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		targetUser.Address = searchResult.Results[locationNumber].Address
 
 		targetUser.Unit = req.FormValue("unit")
 
-		if searchResult.Results[0].Latitude != "NIL" {
-			targetUser.Lat, err = strconv.ParseFloat(searchResult.Results[0].Latitude, 64)
+		if searchResult.Results[locationNumber].Latitude != "NIL" {
+			targetUser.Lat, err = strconv.ParseFloat(searchResult.Results[locationNumber].Latitude, 64)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -447,8 +451,8 @@ func adminUserLocationConfirm(res http.ResponseWriter, req *http.Request) {
 			}
 		}
 
-		if searchResult.Results[0].Longitude != "NIL" {
-			targetUser.Lng, err = strconv.ParseFloat(searchResult.Results[0].Longitude, 64)
+		if searchResult.Results[locationNumber].Longitude != "NIL" {
+			targetUser.Lng, err = strconv.ParseFloat(searchResult.Results[locationNumber].Longitude, 64)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)

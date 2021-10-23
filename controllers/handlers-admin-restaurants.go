@@ -317,14 +317,7 @@ func adminRestaurantLocation(res http.ResponseWriter, req *http.Request) {
 	var mapLink string
 
 	if targetRestaurant.Address != "" {
-		searchResults, err := api.OneMapSearch(targetRestaurant.Address)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		mapLink = api.OneMapGenerateMapPNGSingle(searchResults.Results[0].Latitude, searchResults.Results[0].Longitude)
+		mapLink = api.OneMapGenerateMapPNGSingle(fmt.Sprintf("%f", targetRestaurant.Lat), fmt.Sprintf("%f", targetRestaurant.Lng))
 	}
 
 	// Prepare data to be sent to template
@@ -372,6 +365,7 @@ func adminRestaurantLocationSet(res http.ResponseWriter, req *http.Request) {
 
 	var searchResults api.OneMapSearchResult
 	var newResults []map[string]string
+	var locationQuery string
 
 	if req.Method == http.MethodPost {
 		locationQuery := req.FormValue("locationQuery")
@@ -423,13 +417,15 @@ func adminRestaurantLocationSet(res http.ResponseWriter, req *http.Request) {
 
 	// Prepare data to be sent to template
 	data := struct {
-		User       models.User
-		Restaurant models.Restaurant
-		Locations  []map[string]string
+		User          models.User
+		Restaurant    models.Restaurant
+		Locations     []map[string]string
+		LocationQuery string
 	}{
 		myUser,
 		targetRestaurant,
 		newResults,
+		locationQuery,
 	}
 	tpl.ExecuteTemplate(res, "admin-restaurants-location-set.gohtml", data)
 }
@@ -463,20 +459,28 @@ func adminRestaurantLocationConfirm(res http.ResponseWriter, req *http.Request) 
 	}
 
 	if req.Method == http.MethodPost {
-		currentLocation := req.FormValue("currentLocation")
-		searchResult, err := api.OneMapSearch(currentLocation)
+		locationQuery := req.FormValue("locationQuery")
+		locationNumberString := req.FormValue("locationNumber")
+		locationNumber, err := strconv.Atoi(locationNumberString)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
-		targetRestaurant.Address = searchResult.Results[0].Address
+		searchResult, err := api.OneMapSearch(locationQuery)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		targetRestaurant.Address = searchResult.Results[locationNumber].Address
 
 		targetRestaurant.Unit = req.FormValue("unit")
 
-		if searchResult.Results[0].Latitude != "NIL" {
-			targetRestaurant.Lat, err = strconv.ParseFloat(searchResult.Results[0].Latitude, 64)
+		if searchResult.Results[locationNumber].Latitude != "NIL" {
+			targetRestaurant.Lat, err = strconv.ParseFloat(searchResult.Results[locationNumber].Latitude, 64)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -484,8 +488,8 @@ func adminRestaurantLocationConfirm(res http.ResponseWriter, req *http.Request) 
 			}
 		}
 
-		if searchResult.Results[0].Longitude != "NIL" {
-			targetRestaurant.Lng, err = strconv.ParseFloat(searchResult.Results[0].Longitude, 64)
+		if searchResult.Results[locationNumber].Longitude != "NIL" {
+			targetRestaurant.Lng, err = strconv.ParseFloat(searchResult.Results[locationNumber].Longitude, 64)
 			if err != nil {
 				fmt.Println(err)
 				http.Error(res, "Internal server error", http.StatusInternalServerError)

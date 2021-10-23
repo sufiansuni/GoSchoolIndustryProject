@@ -21,8 +21,9 @@
 		{{if .Locations}}
 			<h2>Select Your Location</h2>
 			<form action="/confirmlocation" method="POST">
+				<input type="hidden" name="locationQuery" value="{{.LocationQuery}}">
 				{{range $index, $value := .Locations}}
-				<input type="radio" id="LocationResult{{$index}}" name="currentLocation" value="{{index $value "ADDRESS"}}" required/>
+				<input type="radio" id="LocationResult{{$index}}" name="locationNumber" value="{{$index}}" required/>
 				<label for="LocationResult{{$index}}">
 					{{index $value "ADDRESS"}}
 					<a href= "{{index $value "MapLink"}}" target="_blank">View Map</a> 
