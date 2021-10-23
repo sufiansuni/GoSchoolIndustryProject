@@ -40,17 +40,11 @@
 
 			<form class="py-2" method="post">
 				<label for="name">Name:</label>
-				<input
-					type="text"
-					name="name"
-					placeholder="{{.Food.Name}}"
-				/><br />
+				<input type="text" name="name" placeholder="{{.Food.Name}}" /><br />
+				<label for="description">Description:</label><br />
+				<textarea name="description" rows="4" cols="50">{{.Food.Description}}</textarea><br />
 				<label for="name">Price:</label>
-				<input
-					type="text"
-					name="price"
-					placeholder="{{.Food.Price}}"
-				/><br />
+				<input type="text" name="price" placeholder="{{.Food.Price}}" /><br />
 				<label for="name">Calories:</label>
 				<input
 					type="text"

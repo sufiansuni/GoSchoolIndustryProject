@@ -108,6 +108,7 @@ func adminRestaurantFoodNew(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		// get form values
 		name := req.FormValue("name")
+		description := req.FormValue("description")
 		price := req.FormValue("price")
 		calories := req.FormValue("calories")
 
@@ -129,6 +130,7 @@ func adminRestaurantFoodNew(res http.ResponseWriter, req *http.Request) {
 			myFood := models.Food{
 				RestaurantID: targetRestaurant.ID,
 				Name:         name,
+				Description:  description,
 				Price:        priceFloat,
 				Calories:     caloriesFloat,
 			}
@@ -146,7 +148,6 @@ func adminRestaurantFoodNew(res http.ResponseWriter, req *http.Request) {
 		// redirect to admin page (restaurants)
 		http.Redirect(res, req, "/admin/restaurants/"+vars["restaurantID"]+"/foods", http.StatusSeeOther)
 		return
-
 	}
 
 	data := struct {
@@ -191,6 +192,7 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		unchangedFood := targetFood
 		name := req.FormValue("name")
+		description := req.FormValue("description")
 		price := req.FormValue("price")
 		calories := req.FormValue("calories")
 
@@ -210,6 +212,10 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 
 		if req.FormValue("name") != "" {
 			targetFood.Name = name
+		}
+
+		if req.FormValue("description") != "" {
+			targetFood.Description = description
 		}
 
 		if req.FormValue("price") != "" {
@@ -241,7 +247,7 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 		targetFood,
 	}
 
-	tpl.ExecuteTemplate(res, "admin-restaurants-foodedit.html", data)
+	tpl.ExecuteTemplate(res, "admin-restaurants-foodedit.gohtml", data)
 }
 
 // Handles request of "/admin/restaurants/{restaurantID}/foods/{foodID}/delete" page

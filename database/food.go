@@ -11,10 +11,11 @@ import (
 
 // Insert a new restaurant entry into database
 func InsertFood(myFood models.Food) error {
-	statement := "INSERT INTO foods (RestaurantID, Name, Price, Calories) VALUES(?, ?, ?, ?)"
+	statement := "INSERT INTO foods (RestaurantID, Name, Description, Price, Calories) VALUES(?, ?, ?, ?, ?)"
 	_, err := DB.Exec(statement,
 		myFood.RestaurantID,
 		myFood.Name,
+		myFood.Description,
 		myFood.Price,
 		myFood.Calories,
 	)
@@ -33,6 +34,7 @@ func SelectFood(ID int) (models.Food, error) {
 		&myFood.ID,
 		&myFood.RestaurantID,
 		&myFood.Name,
+		&myFood.Description,
 		&myFood.Price,
 		&myFood.Calories,
 	)
@@ -41,12 +43,13 @@ func SelectFood(ID int) (models.Food, error) {
 
 // Update a restaurant entry in database
 func UpdateFood(myFood models.Food) error {
-	statement := "UPDATE foods SET RestaurantID=?, Name=?, Price =?, Calories =? " +
+	statement := "UPDATE foods SET RestaurantID=?, Name=?, Description=?, Price =?, Calories =? " +
 		"WHERE ID=?"
 
 	_, err := DB.Exec(statement,
 		myFood.RestaurantID,
 		myFood.Name,
+		myFood.Description,
 		myFood.Price,
 		myFood.Calories,
 		myFood.ID,
@@ -85,6 +88,7 @@ func SelectAllFoodsByRestaurantID(db *sql.DB, restaurantID int) (myFoods []model
 			&myFood.ID,
 			&myFood.RestaurantID,
 			&myFood.Name,
+			&myFood.Description,
 			&myFood.Price,
 			&myFood.Calories,
 		)
