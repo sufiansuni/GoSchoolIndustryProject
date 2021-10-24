@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -654,26 +655,63 @@ func changepassword(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-// Handles request of "/cart" page
-func userCart(res http.ResponseWriter, req *http.Request) {
+// Handles request of "/restaurants" page
+func restaurants(res http.ResponseWriter, req *http.Request) {
 	myUser := checkUser(res, req)
 	if !alreadyLoggedIn(req) {
 		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
 
-	var myOrders []models.Order
-	var myOrderItems []models.OrderItem
-	myOrders, err := database.SelectOrdersByUsernameAndStatus(database.DB, myUser.Username, "Started")
+	var myRestaurants []models.Restaurant
+	myRestaurants, err := database.SelectAllRestaurants(database.DB)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(res, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	var myOrder models.Order
-	if len(myOrders) != 0 {
-		myOrder = myOrders[0]
-		myOrderItems, err = database.SelectOrderItemsByOrderID(database.DB, myOrders[0].ID)
+
+	data := struct {
+		User        models.User
+		Restaurants []models.Restaurant
+	}{
+		myUser,
+		myRestaurants,
+	}
+	tpl.ExecuteTemplate(res, "restaurants.html", data)
+}
+
+// Handles request of "/restaurants/{restaurantID}" page
+func restaurantPage(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	var targetRestaurant models.Restaurant
+	var targetFoods []models.Food
+
+	vars := mux.Vars(req)
+	switch vars["restaurantID"] {
+	case "":
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+
+	default:
+		targetID, err := strconv.Atoi(vars["restaurantID"])
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		targetRestaurant, err = database.SelectRestaurant(targetID)
+		if err != nil {
+			fmt.Println(err)
+			http.Error(res, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		targetFoods, err = database.SelectAllFoodsByRestaurantID(database.DB, targetID)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -681,14 +719,73 @@ func userCart(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	mapLink := api.OneMapGenerateMapPNGSingle(fmt.Sprintf("%f", targetRestaurant.Lat), fmt.Sprintf("%f", targetRestaurant.Lng))
+	var tags string
+	if targetRestaurant.Halal {
+		tags += "Halal "
+	}
+
+	if targetRestaurant.Vegan {
+		tags += "Vegan "
+	}
+
+	if req.Method == http.MethodGet {
+		data := struct {
+			User       models.User
+			Restaurant models.Restaurant
+			Foods      []models.Food
+			MapLink    string
+			Tags       string
+		}{
+			myUser,
+			targetRestaurant,
+			targetFoods,
+			mapLink,
+			tags,
+		}
+		tpl.ExecuteTemplate(res, "restaurant-page.html", data)
+	}
+}
+
+// Handles request of "/orders" page
+func userOrders(res http.ResponseWriter, req *http.Request) {
+	myUser := checkUser(res, req)
+	if !alreadyLoggedIn(req) {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	started, err := database.SelectOrdersByUsernameAndStatus(database.DB, myUser.Username, "started")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	awaitingCollection, err := database.SelectOrdersByUsernameAndStatus(database.DB, myUser.Username, "awaiting collection")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	completed, err := database.SelectOrdersByUsernameAndStatus(database.DB, myUser.Username, "completed")
+	if err != nil {
+		fmt.Println(err)
+		http.Error(res, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	data := struct {
-		User       models.User
-		Order      models.Order
-		OrderItems []models.OrderItem
+		User               models.User
+		Started            []models.Order
+		AwaitingCollection []models.Order
+		Completed          []models.Order
 	}{
 		myUser,
-		myOrder,
-		myOrderItems,
+		started,
+		awaitingCollection,
+		completed,
 	}
-	tpl.ExecuteTemplate(res, "cart.html", data)
+	tpl.ExecuteTemplate(res, "user-orders.html", data)
 }

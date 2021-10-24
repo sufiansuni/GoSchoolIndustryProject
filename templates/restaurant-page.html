@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>Restaurant Page</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+
+		<div class="px-3">
+			<h2>Welcome to {{.Restaurant.Name}}</h2>
+			<b>Address</b>: {{if .Restaurant.Address}} {{.Restaurant.Address}}
+			<a href="{{.MapLink}}" target="_blank">View Map</a>
+			{{else}} Not Set {{end}}
+			<br />
+			<b>Unit</b>: {{if .Restaurant.Unit}} {{.Restaurant.Unit}} {{else}} Not Set
+			{{end}}
+			<br />
+			<br />
+			<b>Description</b>: {{.Restaurant.Description}}
+			<br />
+			{{if .Tags}} Tags: {{.Tags}} <br />{{end}}
+			<br />
+
+			{{if .Foods}}
+			<!-- Food Items Go Here -->
+			<table>
+				<thead>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Price</th>
+					<th>Calories</th>
+					<th>Add to Cart</th>
+				</thead>
+				<tbody>
+					{{range .Foods}}
+					<tr>
+						<td>{{.Name}}</td>
+						<td>{{.Description}}</td>
+						<td>{{.Price}}</td>
+						<td>{{.Calories}}</td>
+						<td>
+							<form action="/addtocart/{{.ID}}" method="post">
+								<label for="quantity">Quantity:</label>
+								<input type="number" name="quantity" min="1" max="99" />
+								<button
+									type="submit"
+									class="btn btn-light"
+									style="background-color: #d70f64; color: white"
+								>
+									Add to Cart
+								</button>
+							</form>
+						</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+			<!-- No Food Items -->
+			<br />
+			There are no food items
+			<br />
+			{{end}}
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

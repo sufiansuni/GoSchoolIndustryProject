@@ -6,5 +6,5 @@ type Food struct {
 	Name         string
 	Description  string
 	Price        float64
-	Calories     float64
+	Calories     int
 }

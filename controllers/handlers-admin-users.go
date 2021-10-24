@@ -492,13 +492,12 @@ func adminUserOrders(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	searchCart, err := database.SelectOrdersByUsernameAndStatus(database.DB, targetUser.Username, "started")
+	started, err := database.SelectOrdersByUsernameAndStatus(database.DB, targetUser.Username, "started")
 	if err != nil {
 		fmt.Println(err)
 		http.Error(res, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	cart := searchCart[0]
 
 	awaitingCollection, err := database.SelectOrdersByUsernameAndStatus(database.DB, targetUser.Username, "awaiting collection")
 	if err != nil {
@@ -517,13 +516,13 @@ func adminUserOrders(res http.ResponseWriter, req *http.Request) {
 	data := struct {
 		User               models.User
 		Target             models.User
-		Cart               models.Order
+		Started            []models.Order
 		AwaitingCollection []models.Order
 		Completed          []models.Order
 	}{
 		myUser,
 		targetUser,
-		cart,
+		started,
 		awaitingCollection,
 		completed,
 	}

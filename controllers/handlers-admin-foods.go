@@ -119,7 +119,7 @@ func adminRestaurantFoodNew(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		caloriesFloat, err := strconv.ParseFloat(calories, 64)
+		caloriesInt, err := strconv.Atoi(calories)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -132,7 +132,7 @@ func adminRestaurantFoodNew(res http.ResponseWriter, req *http.Request) {
 				Name:         name,
 				Description:  description,
 				Price:        priceFloat,
-				Calories:     caloriesFloat,
+				Calories:     caloriesInt,
 			}
 
 			err := database.InsertFood(myFood) // previouslymapUsers[username] = myUser
@@ -203,7 +203,7 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		caloriesFloat, err := strconv.ParseFloat(calories, 64)
+		caloriesInt, err := strconv.Atoi(calories)
 		if err != nil {
 			fmt.Println(err)
 			http.Error(res, "Internal server error", http.StatusInternalServerError)
@@ -223,7 +223,7 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if req.FormValue("calories") != "" {
-			targetFood.Calories = caloriesFloat
+			targetFood.Calories = caloriesInt
 		}
 
 		if !reflect.DeepEqual(targetFood, unchangedFood) {

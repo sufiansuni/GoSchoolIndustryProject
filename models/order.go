@@ -3,7 +3,7 @@ package models
 type Order struct {
 	ID             int
 	Username       string
-	RestaurantID   string
+	RestaurantID   int
 	RestaurantName string
 
 	Status     string // Started > Awaiting Collection > Completed

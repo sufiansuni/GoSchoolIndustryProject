@@ -113,7 +113,7 @@ func OneMapGetToken() (OneMapGetTokenResult, error) {
 // Returns a suitable request string to OneMAP Static Map API.
 // Note that the result the above request is of PNG format.
 // Pass it to a html template. Eg: <img src = {{.}} alt="Map">
-func OneMapGenerateMapPNGTwoPoints(start_lat string, start_lng string, end_lat string, end_lng string) string {
+func OneMapGenerateMapPNGTwoPoints(start_lat string, start_lng string, end_lat string, end_lng string) (MapPNG string, Distance int) {
 
 	route, err := TomTomRouting(start_lat, start_lng, end_lat, end_lng)
 	if err != nil {
@@ -139,7 +139,7 @@ func OneMapGenerateMapPNGTwoPoints(start_lat string, start_lng string, end_lat s
 	points += "|"
 	points += "[" + end_lat + "," + end_lng + ",%22" + "255,255,178" + "%22,%22" + "B" + "%22]" //R,G,B,Label
 
-	MapPNG := "https://developers.onemap.sg/commonapi/staticmap/getStaticImage?layerchosen=default&" +
+	MapPNG = "https://developers.onemap.sg/commonapi/staticmap/getStaticImage?layerchosen=default&" +
 		"&lat=" + mid_lat +
 		"&lng=" + mid_lng +
 		"&zoom=16" +
@@ -150,7 +150,7 @@ func OneMapGenerateMapPNGTwoPoints(start_lat string, start_lng string, end_lat s
 		"&color=" +
 		"&fillColor="
 
-	return MapPNG
+	return MapPNG, route.Routes[0].Summary.Lengthinmeters
 }
 
 // Convert string inputs into Point type and return a mid-point

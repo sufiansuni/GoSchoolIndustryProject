@@ -115,7 +115,7 @@ func CreateFoodTable() {
 		"Name VARCHAR(255), " +
 		"Description VARCHAR(255), " +
 		"Price FLOAT UNSIGNED, " +
-		"Calories FLOAT UNSIGNED " +
+		"Calories MEDIUMINT UNSIGNED " +
 		")")
 
 	if err != nil {
