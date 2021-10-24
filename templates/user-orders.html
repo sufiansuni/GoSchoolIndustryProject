@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>MY ORDERS</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>My Orders</h2>
+			<h4>Cart</h4>
+			{{if .Started}}
+			<table>
+				<thead>
+					<th>OrderID</th>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+				</thead>
+				<tbody>
+					{{range .Started}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+
+			<p>No Cart</p>
+
+			{{end}}
+
+			<br />
+			<h4>Awaiting Collection</h4>
+			{{if .AwaitingCollection}}
+			<table>
+				<thead>
+					<th>OrderID</th>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+				</thead>
+				<tbody>
+					{{range .AwaitingCollection}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+
+			<p>No Orders Awaiting Collection</p>
+
+			{{end}}
+
+			<br />
+			<h4>Completed</h4>
+			{{if .Completed}}
+			<table>
+				<thead>
+					<th>OrderID</th>
+					<th>RestaurantID</th>
+					<th>Restaurant Name</th>
+					<th>Collection</th>
+					<th>Date</th>
+				</thead>
+				<tbody>
+					{{range .Completed}}
+					<tr>
+						<td>{{.ID}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
+					</tr>
+					{{end}}
+				</tbody>
+			</table>
+			{{else}}
+
+			<p>No Completed Orders</p>
+
+			{{end}}
+		</div>
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

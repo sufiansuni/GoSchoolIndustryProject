@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<!-- Title -->
+		<title>MY CART</title>
+
+		<!-- Bootstrap -->
+		{{template "bootstrap"}}
+	</head>
+	<style>
+		table,
+		th,
+		td {
+			border: 1px solid black;
+			padding: 5px;
+			margin-top: 10px;
+		}
+	</style>
+	<body>
+		<!-- Navbar -->
+		{{template "navbar" .}}
+		<!-- End of Navbar -->
+		<div class="px-3">
+			<h2>Cart</h2>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/restaurants"
+				role="button"
+			>
+				Back to Restaurants
+			</a>
+			<br>
+			{{if gt .Order.ID 0}} 
+				<b>User Address</b>: {{.Order.UserAddress}}
+				<a href="{{.UserMapLink}}" target="_blank">View Map</a>
+				<br>
+				<b>User Unit</b>: {{.Order.UserUnit}}<br>
+				<b>Restaurant Name</b>: {{.Order.RestaurantName}}<br>
+				<b>Restaurant Address</b>: {{.Order.RestaurantAddress}}
+				<a href="{{.RestaurantMapLink}}" target="_blank">View Map</a>
+				<br>
+				<b>Restaurant Unit</b>: {{.Order.RestaurantUnit}}<br>
+
+				<br>
+				<b>Date</b>: {{.Order.Date}}<br>
+				<b>Collection Mode</b>: {{.Order.Collection}}<br>
+				<a
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+					href="/cart/delivery/{{.Order.ID}}"
+					role="button"
+				>
+					Delivery
+				</a>
+				<a
+					class="btn btn-light"
+					style="background-color: #d70f64; color: white"
+					href="/cart/self-collect/{{.Order.ID}}"
+					role="button"
+				>
+					Self-Collect
+				</a>
+			{{else}} 
+			    You Have Not Started An Order 
+			{{end}} 
+			
+			{{if .OrderItems}}
+			<table>
+				<thead>
+					<th>Food Name</th>
+					<th colspan="3">Quantity</th>
+					<th>Subtotal Price</th>
+					<th>Subtotal Calories</th>
+					<th>Remove</th>
+				</thead>
+				<tbody>
+					{{range .OrderItems}}
+					<tr>
+						<td>{{.FoodName}}</td>
+						<td style="border-right: 0">
+							<a
+								class="btn btn-light btn-sm"
+								style="background-color: #d70f64; color: white"
+								href="/cart/{{.ID}}/subtract"
+								role="button"
+							>
+								-
+							</a>
+						</td>
+						<td style="border-left: 0; border-right: 0;">{{.Quantity}}</td>
+						<td style="border-left: 0">
+							<a
+								class="btn btn-light btn-sm"
+								style="background-color: #d70f64; color: white"
+								href="/cart/{{.ID}}/add"
+								role="button"
+							>
+								+
+							</a>
+						</td>
+						<td>{{.SubtotalPrice}}</td>
+						<td>{{.SubtotalCalories}}</td>
+						<td>
+							<a
+								class="btn btn-light"
+								style="background-color: #d70f64; color: white"
+								href="/cart/{{.ID}}/delete"
+								role="button"
+								onclick="return confirm('Are you sure you want to remove {{.FoodName}}?')"
+							>
+								Remove
+							</a>
+						</td>
+					</tr>
+					{{end}}
+					<tr>
+						<td style="text-align: right"><b>Totals:</b></td>
+						<td colspan="3">{{.Order.TotalItems}}</td>
+						<td>{{.Order.TotalPrice}}</td>
+						<td>{{.Order.TotalCalories}}</td>
+						<td></td>
+					</tr>
+				</tbody>
+			</table>
+
+			{{else}}
+			<br />
+			Your Cart Is Empty 
+			{{end}}
+
+			{{if gt .Order.ID 0}} 
+			<br>
+			<h4>Health Report</h4>
+			<b>User's Target Daily Calories</b>: {{.User.CaloriesPerDay}}<br>
+			<b>Calories from Today's Orders</b>: {{.TodayCalories}}<br>
+			<b>Calories To Target</b>: {{.CaloriesToTarget}}<br>
+			{{if gt .Order.TotalCalories .CaloriesToTarget}}
+			<p style="color: red;"><b>WARNING! CART WILL GO OVER CALORIES TO TARGET!</b></p>
+			{{else}}
+			<p style="color: green;"><b>Cart Is Within Target Calories. Nice.</b></p>
+			{{end}}
+
+			<h4>Self-Collect Preview</h4>
+			Total Walking Distance: {{.WalkingDistance}} meters
+			<a href="{{.RouteMapLink}}" target="_blank">View Map</a>
+			<br>
+			Average Walking Calorie Burn: {{.AverageWalkingCalorieBurn}}
+			<br>
+			<br>
+			<a
+				class="btn btn-light"
+				style="background-color: #d70f64; color: white"
+				href="/cart/confirm/{{.Order.ID}}"
+				role="button"
+			>
+				Confirm Order
+			</a>
+			<br>
+			<br>
+			{{end}}
+		</div>
+
+		<!-- Bootstrap Javascript -->
+		{{template "bootstrap-javascript"}}
+	</body>
+</html>

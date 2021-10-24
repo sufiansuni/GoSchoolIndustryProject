@@ -166,3 +166,36 @@ func DeleteOrderItem(db *sql.DB, orderItemID int) (err error) {
 	}
 	return
 }
+
+// Select/Read order_items from database with a orderID and foodID input
+func SelectOrderItemsByOrderIDAndFoodID(db *sql.DB, orderID int, foodID int) (myOrderItems []models.OrderItem, err error) {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM order_items WHERE orderID=? AND foodID=?"
+	rows, err := db.QueryContext(ctx, query, orderID, foodID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var myOrderItem models.OrderItem
+		err = rows.Scan(
+			&myOrderItem.ID,
+			&myOrderItem.OrderID,
+			&myOrderItem.FoodID,
+			&myOrderItem.FoodName,
+			&myOrderItem.Quantity,
+			&myOrderItem.SubtotalPrice,
+			&myOrderItem.SubtotalCalories,
+		)
+		if err != nil {
+			return nil, err
+		}
+		myOrderItems = append(myOrderItems, myOrderItem)
+	}
+
+	return
+}

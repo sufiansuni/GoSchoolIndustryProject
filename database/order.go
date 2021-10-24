@@ -313,3 +313,49 @@ func SelectAllOrders(db *sql.DB) ([]models.Order, error) {
 	}
 	return myOrders, err
 }
+
+// Select/Read order entries from database with a username, date and status input
+func SelectOrdersByUsernameDateStatus(db *sql.DB, username string, date string, status string) ([]models.Order, error) {
+	var myOrders []models.Order
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	query := "SELECT * FROM orders WHERE Username=? AND Date=? AND Status=?"
+
+	rows, err := db.QueryContext(ctx, query, username, date, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var myOrder models.Order
+		err := rows.Scan(
+			&myOrder.ID,
+			&myOrder.Username,
+			&myOrder.RestaurantID,
+			&myOrder.RestaurantName,
+			&myOrder.Status,
+			&myOrder.Collection,
+			&myOrder.Date,
+			&myOrder.UserAddress,
+			&myOrder.UserUnit,
+			&myOrder.UserLat,
+			&myOrder.UserLng,
+			&myOrder.RestaurantAddress,
+			&myOrder.RestaurantUnit,
+			&myOrder.RestaurantLat,
+			&myOrder.RestaurantLng,
+			&myOrder.TotalItems,
+			&myOrder.TotalPrice,
+			&myOrder.TotalCalories,
+			&myOrder.BurnCalories,
+		)
+		if err != nil {
+			return nil, err
+		}
+		myOrders = append(myOrders, myOrder)
+	}
+	return myOrders, err
+}

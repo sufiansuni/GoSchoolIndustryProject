@@ -31,15 +31,22 @@ func StartHTTPServer() {
 	r.HandleFunc("/confirmlocation", confirmlocation)
 	r.HandleFunc("/profile", profile)
 	r.HandleFunc("/changepassword", changepassword)
+	r.HandleFunc("/orders", userOrders)
+
+	r.HandleFunc("/restaurants", restaurants)                   // Restaurant Listing
+	r.HandleFunc("/restaurants/{restaurantID}", restaurantPage) // Individual Restaurant Page, Food Listing
 
 	r.HandleFunc("/cart", userCart)
-	// r.HandleFunc("/cart/confirm", cartConfirm)
+	r.HandleFunc("/addtocart/{foodID}", addToCart)
 
-	// r.HandleFunc("/restaurants", restaurants) // Restaurant Listing
-	// r.HandleFunc("/restaurants/{restaurantID}", restaurantPage) // Individual Restaurant Page, Food Listing
-	// r.HandleFunc("/restaurants/{restaurantID}/foods/{foodID}", foodPage) // User will set quantity here
-	// r.HandleFunc("/restaurants/{restaurantID}/foods/{foodID}/add", addToCart) // Initial check, start new order? add go over calories?
-	// r.HandleFunc("/restaurants/{restaurantID}/foods/{foodID}/addConfirm", addToCartConfirm) // Confirm Add
+	r.HandleFunc("/cart/{itemID}/add", cartItemAdd)
+	r.HandleFunc("/cart/{itemID}/subtract", cartItemSubtract)
+	r.HandleFunc("/cart/{itemID}/delete", cartItemDelete)
+
+	r.HandleFunc("/cart/delivery/{orderID}", cartDelivery)
+	r.HandleFunc("/cart/self-collect/{orderID}", cartSelfCollect)
+
+	r.HandleFunc("/cart/confirm/{orderID}", cartConfirm)
 
 	r.HandleFunc("/admin", admin)
 

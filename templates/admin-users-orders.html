@@ -64,11 +64,10 @@
 			<br />
 			<br />
 			<h4>Cart</h4>
-			{{if .Cart.ID}}
-			<!-- If Cart Exists -->
-			OrderID : {{.Cart.ID}}
+			{{if .Started}}
 			<table>
 				<thead>
+					<th>OrderID</th>
 					<th>RestaurantID</th>
 					<th>Restaurant Name</th>
 					<th>Collection</th>
@@ -78,16 +77,18 @@
 					<th>Delete Order</th>
 				</thead>
 				<tbody>
+					{{range .Started}}
 					<tr>
-						<td>{{.Cart.RestaurantID}}</td>
-						<td>{{.Cart.RestaurantName}}</td>
-						<td>{{.Cart.Collection}}</td>
-						<td>{{.Cart.Date}}</td>
+						<td>{{.ID}}</td>
+						<td>{{.RestaurantID}}</td>
+						<td>{{.RestaurantName}}</td>
+						<td>{{.Collection}}</td>
+						<td>{{.Date}}</td>
 						<td>
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/orders/{{.Cart.ID}}/items"
+								href="/admin/orders/{{.ID}}/items"
 								role="button"
 							>
 								Manage Order Items
@@ -97,7 +98,7 @@
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/orders/{{.Cart.ID}}/details"
+								href="/admin/orders/{{.ID}}/details"
 								role="button"
 							>
 								View Details
@@ -107,20 +108,20 @@
 							<a
 								class="btn btn-light"
 								style="background-color: #d70f64; color: white"
-								href="/admin/orders/{{.Cart.ID}}/delete"
+								href="/admin/orders/{{.ID}}/delete"
 								role="button"
-								onclick="return confirm('Are you sure you want to delete order of id: {{.Cart.ID}}?')"
+								onclick="return confirm('Are you sure you want to delete order of id: {{.ID}}?')"
 							>
 								Delete Order
 							</a>
 						</td>
 					</tr>
+					{{end}}
 				</tbody>
 			</table>
-
 			{{else}}
 
-			<p>No Cart Started</p>
+			<p>No Cart</p>
 
 			{{end}}
 
