@@ -196,20 +196,6 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 		price := req.FormValue("price")
 		calories := req.FormValue("calories")
 
-		priceFloat, err := strconv.ParseFloat(price, 64)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
-		caloriesInt, err := strconv.Atoi(calories)
-		if err != nil {
-			fmt.Println(err)
-			http.Error(res, "Internal server error", http.StatusInternalServerError)
-			return
-		}
-
 		if req.FormValue("name") != "" {
 			targetFood.Name = name
 		}
@@ -219,10 +205,22 @@ func adminRestaurantFoodEdit(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if req.FormValue("price") != "" {
+			priceFloat, err := strconv.ParseFloat(price, 64)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 			targetFood.Price = priceFloat
 		}
 
 		if req.FormValue("calories") != "" {
+			caloriesInt, err := strconv.Atoi(calories)
+			if err != nil {
+				fmt.Println(err)
+				http.Error(res, "Internal server error", http.StatusInternalServerError)
+				return
+			}
 			targetFood.Calories = caloriesInt
 		}
 
